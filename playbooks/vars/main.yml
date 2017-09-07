@@ -1,0 +1,5 @@
+---
+# These paths will exist on <analytics.fold.it> and on <foldit>
+puzzle_dir: "data-raw/puzzle-{{ puzzle_id }}"
+available_solutions: "{{ puzzle_dir }}/available_solutions.txt"
+solution_data:       "{{ puzzle_dir }}/foldit.db"

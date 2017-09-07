@@ -1,0 +1,50 @@
+---
+# Usage:
+#   $ ansible-playbook get_solutions.yml -e puzzle_id=2004007
+
+- hosts: analytics.fold.it
+  remote_user: pierce
+  vars_files:
+    - vars/main.yml
+  force_handlers: True
+  tasks:
+
+    # Verify that the dest directories exist
+
+    - name: Verify that the dest directory exists on analytics.fold.it
+      file: path=~/{{ puzzle_dir }} state=directory
+
+    - name: Verify that the dest directory exists on foldit
+      local_action: file path={{ puzzle_dir }} state=directory
+
+
+    # Figure out which solutions to process
+
+    - name: Find all puzzles with data available on analytics.fold.it
+      script: scripts/solution-paths.sh {{ puzzle_id }} > ~/{{ available_solutions }}
+      args:
+        executable: /bin/bash
+        creates: "~/{{ available_solutions }}"
+      notify:
+        - clean up
+
+
+    # Process the solutions on analytics.fold.it
+
+    - name: Go get the latest foldit script
+      local_action: shell go get -u github.com/pedmiston/foldit
+
+    - name: Run the puzzle solutions through the parsing script
+      script: ~/go/bin/foldit -paths ~/{{ available_solutions }} -dest ~/{{ solution_data }}
+      args:
+        creates: "~/{{ solution_data }}"
+      notify:
+        - clean up
+
+    - name: Download the data
+      fetch: src=~/{{ solution_data }} dest={{ solution_data }} flat=yes
+
+
+  handlers:
+    - name: clean up
+      file: path=~/{{ puzzle_dir }} state=absent

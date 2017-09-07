@@ -1,0 +1,19 @@
+---
+- hosts: analytics.fold.it
+  remote_user: pierce
+  force_handlers: yes
+
+  vars:
+    - solution_paths: "puzzle_{{ puzzle_id }}_paths.txt"
+
+  tasks:
+    - name: Find available solutions
+      script: scripts/solution-paths {{ puzzle_id }} > ~/{{ solution_paths }}
+      notify: clean up
+
+    - name: Fetch puzzle info
+      fetch: src=~/{{ solution_paths }} dest=./{{ solution_paths }} flat=yes
+
+  handlers:
+    - name: clean up
+      file: path=~/{{ solution_paths }} state=absent

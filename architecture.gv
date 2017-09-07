@@ -1,0 +1,9 @@
+digraph {
+  node[fontname=Helvetica];
+  rankdir = BT;
+  localhost -> foldit -> analytics_fold_it;
+  { rank=same; foldit, mysql; }
+  foldit -> mysql[minlen=2 dir=both];
+
+  analytics_fold_it[label="analytics.fold.it"];
+}

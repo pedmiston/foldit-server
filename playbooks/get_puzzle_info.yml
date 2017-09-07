@@ -1,0 +1,22 @@
+---
+- hosts: analytics.fold.it
+  remote_user: pierce
+  force_handlers: yes
+
+  vars:
+    - dst: puzzle-info
+
+  tasks:
+    - name: Ensure dst exists on host
+      file: path=~/{{ dst }} state=directory
+
+    - name: Find available puzzles
+      script: scripts/puzzle-info.sh ~/{{ dst }}/puzzle-info.csv
+      notify: clean up
+
+    - name: Fetch puzzle info
+      fetch: src=~/{{ dst }}/puzzle-info.csv dest=./puzzle-info.csv flat=yes
+
+  handlers:
+    - name: clean up
+      file: path=~/{{ dst }} state=absent
