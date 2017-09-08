@@ -1,0 +1,21 @@
+---
+- hosts: analytics.fold.it
+  remote_user: pierce
+  force_handlers: yes
+  vars:
+    - paths: solution-paths.txt
+  tasks:
+    - name: Find available solutions
+      script: bin/find-solutions > ~/{{ paths }}
+      args:
+        executable: /bin/bash
+      notify:
+        - clean up
+
+    - name: Retrieve available solutions
+      fetch: src=~/{{ paths }} dest={{ paths }} flat=yes
+  handlers:
+    - name: clean up
+      file: path={{ item }} state=absent
+      with_items:
+        - "{{ paths }}"
