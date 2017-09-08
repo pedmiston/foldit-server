@@ -5,7 +5,7 @@
   force_handlers: yes
   vars:
     - top_paths: top-solution-paths.txt
-    - puzzles_with_all: puzzles-with-all.txt
+    - all_paths: all-solution-paths.txt
   vars_files:
     - vars/main.yml
   tasks:
@@ -31,3 +31,6 @@
 
     - name: Delete files of solution filepaths for each puzzle with 'all/'
       command: rm ~/puzzle-*-all.txt
+
+    - name: Combine all files of solution filepaths for 'all/' puzzles
+      local_action: shell cat ~/puzzle-*-all.txt > {{ all_paths }} && rm ~/puzzle-*-all.txt
