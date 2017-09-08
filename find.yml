@@ -11,8 +11,6 @@
       script: bin/find-top-solutions > ~/{{ top_paths }}
       args:
         executable: /bin/bash
-      async: 1800
-      poll: 300
       notify:
         - clean up
 
@@ -20,8 +18,6 @@
       script: bin/find-all-solutions > ~/{{ all_paths }}
       args:
         executable: /bin/bash
-      async: 1800
-      poll: 300
       notify:
         - clean up
 
