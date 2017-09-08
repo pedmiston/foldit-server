@@ -4,16 +4,20 @@
   remote_user: pierce
   force_handlers: yes
   vars:
+    - paths_dir: "{{ repo.loc }}/solution-paths"
     - top_paths: top-solution-paths.txt
     - all_paths: all-solution-paths.txt
   vars_files:
     - vars/main.yml
   tasks:
+    - name: Ensure dest directory exists
+      file: path={{ paths_dir }} state=directory
+
     - name: Find available 'top/' solutions
       script: bin/find-top-solutions > ~/{{ top_paths }}
 
     - name: Fetch list of available top solution files
-      fetch: src=~/{{ top_paths }} dest={{ repo.loc }}/{{ top_paths }} flat=yes
+      fetch: src=~/{{ top_paths }} dest={{ paths_dir }}/{{ top_paths }} flat=yes
 
     - name: Delete the file with top solution files
       file: path=~/{{ top_paths }} state=absent
@@ -27,10 +31,11 @@
       with_items: "{{ find_puzzles_with_all_output.stdout_lines }}"
 
     - name: Fetch lists of solution files for each puzzle with 'all/'
-      fetch: src=~/puzzle-{{ item }}-all.txt dest={{ repo.loc }}/puzzle-{{ item }}-all.txt flat=yes
+      fetch: src=~/puzzle-{{ item }}-all.txt dest={{ paths_dir }}/puzzle-{{ item }}-all.txt flat=yes
+      with_items: "{{ find_puzzles_with_all_output.stdout_lines }}"
 
     - name: Delete files of solution filepaths for each puzzle with 'all/'
-      command: rm ~/puzzle-*-all.txt
+      shell: rm ~/puzzle-*-all.txt
 
     - name: Combine all files of solution filepaths for 'all/' puzzles
-      local_action: shell cat ~/puzzle-*-all.txt > {{ all_paths }} && rm ~/puzzle-*-all.txt
+      local_action: shell cat {{ paths_dir }}/puzzle-*-all.txt > {{ paths_dir }}/{{ all_paths }} && rm {{ paths_dir }}/puzzle-*-all.txt
