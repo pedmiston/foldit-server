@@ -21,19 +21,16 @@
     - name: Find puzzles with 'all/' directory
       script: bin/find-puzzles-with-all > ~/{{ puzzles_with_all }}
 
-    - name: Fetch list of available puzzles with 'all/'
-      fetch: src=~/{{ puzzles_with_all }} dest={{ repo.loc }}/{{ puzzles_with_all }} flat=yes
-
-    - name: Delete the file listing puzzles with 'all/'
-      file: path=~/{{ puzzles_with_all }} state=absent
-
     - name: Find available 'all/' solutions puzzle-by-puzzle
       script: bin/find-all-solutions {{ item }} > ~/puzzle-{{ item }}-all.txt
-      with_lines: "{{ repo.loc }}/{{ puzzles_with_all }}"
+      with_lines: "~/{{ puzzles_with_all }}"
 
     - name: Fetch list of solution files for each puzzle with 'all/'
       fetch: src=~/puzzle-{{ item }}-all.txt dest={{ repo.loc }}/puzzle-{{ item }}-all.txt flat=yes
-      with_lines: "{{ repo.loc }}/{{ puzzles_with_all }}"
+      with_lines: "~/{{ puzzles_with_all }}"
+
+    - name: Delete the file listing puzzles with 'all/'
+      file: path=~/{{ puzzles_with_all }} state=absent
 
     - name: Delete files listing solution paths for each puzzle with 'all/'
       command: rm ~/puzzle-*-all.txt
