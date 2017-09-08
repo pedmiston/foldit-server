@@ -1,0 +1,17 @@
+---
+- hosts: foldit
+  vars_files:
+      - vars/main.yml
+  tasks:
+      - name: Clone/update foldit-server repo
+        git:
+            repo: "{{ repo.url }}"
+            dest: "{{ repo.loc }}"
+
+      - name: Create a cron job to update the foldit-server repo
+        cron:
+            name: "update foldit-server repo"
+            minute: "0"
+            hour: "0"
+            job: "cd {{ repo.loc }} && git pull -q"
+            user: "{{ ansible_user_id }}"
