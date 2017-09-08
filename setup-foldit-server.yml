@@ -39,3 +39,6 @@
             host: "%"
             password: "{{ mysql_foldit_password }}"
             priv: "{{ mysql_db_name }}.*:ALL"
+
+    # TODO: setup py venv
+    # TODO: template .profile

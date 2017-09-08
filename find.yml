@@ -5,31 +5,28 @@
   force_handlers: yes
   vars:
     - top_paths: top-solution-paths.txt
-    - all_paths: all-solution-paths.txt
+    - puzzles_with_all: puzzles-with-all.txt
+  vars_files:
+    - vars/main.yml
   tasks:
     - name: Find available 'top/' solutions
       script: bin/find-top-solutions > ~/{{ top_paths }}
-      args:
-        executable: /bin/bash
-      notify:
-        - clean up
 
-    - name: Find available 'all/' solutions
-      script: bin/find-all-solutions > ~/{{ all_paths }}
-      args:
-        executable: /bin/bash
-      notify:
-        - clean up
+    - name: Fetch list of available top solution files
+      fetch: src=~/{{ top_paths }} dest={{ repo.loc }}/{{ top_paths }} flat=yes
 
-    - name: Retrieve available solutions
-      fetch: src=~/{{ item }} dest={{ item }} flat=yes
-      with_items:
-        - "{{ top_paths }}"
-        - "{{ all_paths }}"
+    - name: Delete the file with top solution files
+      file: path=~/{{ top_paths }} state=absent
 
-  handlers:
-    - name: clean up
-      file: path={{ item }} state=absent
-      with_items:
-        - "{{ top_paths }}"
-        - "{{ all_paths }}"
+    - name: Find puzzles with 'all/' directory
+      script: bin/find-puzzles-with-all-solutions > ~/{{ puzzles_with_all }}
+
+    - name: Fetch list of available puzzles with 'all/'
+      fetch: src=~/{{ puzzles_with_all }} dest={{ repo.loc }}/{{ puzzles_with_all }} flat=yes
+
+    - name: Delete the file listing puzzles with 'all/'
+      file: path=~/{{ puzzles_with_all }} state=absent
+
+    - name: Find available 'all/' solutions puzzle-by-puzzle
+      script: bin/find-all-solutions {{ item }} > ~/puzzle-{{ item }}-all.txt
+      with_lines: "{{ repo.loc }}/{{ puzzles_with_all }}"

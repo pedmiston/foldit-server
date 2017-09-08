@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Find puzzles with at least one .pdb file in all/
+find ~/fetch/ -maxdepth 1 -name "solution_*" -type d \
+  -exec find {}/all/ -maxdepth 2 -name "*.pdb" -print -quit \; 2> /dev/null \
+  | awk -F '/all/' '{ split($1,a,"_"); print a[2] }'
