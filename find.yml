@@ -30,3 +30,10 @@
     - name: Find available 'all/' solutions puzzle-by-puzzle
       script: bin/find-all-solutions {{ item }} > ~/puzzle-{{ item }}-all.txt
       with_lines: "{{ repo.loc }}/{{ puzzles_with_all }}"
+
+    - name: Fetch list of solution files for each puzzle with 'all/'
+      fetch: src=~/puzzle-{{ item }}-all.txt dest={{ repo.loc }}/puzzle-{{ item }}-all.txt flat=yes
+      with_lines: "{{ repo.loc }}/{{ puzzles_with_all }}"
+
+    - name: Delete files listing solution paths for each puzzle with 'all/'
+      command: rm ~/puzzle-*-all.txt
