@@ -5,9 +5,11 @@
   vars:
     - top_paths: top-solution-paths.txt
     - all_paths: all-solution-paths.txt
+  vars_files:
+    - vars/main.yml
   tasks:
     - name: Find available 'top/' solutions
-      script: bin/find-top-solutions > ~/{{ top_paths }}
+      script: bin/find-top-solutions > {{ repo.loc }}/{{ top_paths }}
       args:
         executable: /bin/bash
       async:
@@ -15,7 +17,7 @@
         - clean up
 
     - name: Find available 'all/' solutions
-      script: bin/find-all-solutions > ~/{{ all_paths }}
+      script: bin/find-all-solutions > {{ repo.loc }}/{{ all_paths }}
       args:
         executable: /bin/bash
       async:
