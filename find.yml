@@ -9,17 +9,17 @@
   vars_files:
     - vars/main.yml
   tasks:
-    - name: Find available 'top/' solutions
-      script: bin/find-top-solutions > ~/{{ top_paths }}
-
-    - name: Fetch list of available top solution files
-      fetch: src=~/{{ top_paths }} dest={{ repo.loc }}/{{ top_paths }} flat=yes
-
-    - name: Delete the file with top solution files
-      file: path=~/{{ top_paths }} state=absent
+    # - name: Find available 'top/' solutions
+    #   script: bin/find-top-solutions > ~/{{ top_paths }}
+    #
+    # - name: Fetch list of available top solution files
+    #   fetch: src=~/{{ top_paths }} dest={{ repo.loc }}/{{ top_paths }} flat=yes
+    #
+    # - name: Delete the file with top solution files
+    #   file: path=~/{{ top_paths }} state=absent
 
     - name: Find puzzles with 'all/' directory
-      script: bin/find-puzzles-with-all-solutions > ~/{{ puzzles_with_all }}
+      script: bin/find-puzzles-with-all > ~/{{ puzzles_with_all }}
 
     - name: Fetch list of available puzzles with 'all/'
       fetch: src=~/{{ puzzles_with_all }} dest={{ repo.loc }}/{{ puzzles_with_all }} flat=yes
