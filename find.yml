@@ -20,3 +20,16 @@
 
     - name: Find puzzles with 'all/' directory
       script: bin/find-puzzles-with-all > ~/{{ puzzles_with_all }}
+
+    - name: Fetch list of available puzzles with all solutions
+      fetch: src=~/{{ puzzles_with_all }} dest={{ repo.loc }}/{{ puzzles_with_all }} flat=yes
+
+    - name: Delete the file used to store puzzle ids
+      file: path=~/{{ puzzles_with_all }} state=absent
+
+- hosts: localhost
+  vars:
+    - puzzles_with_all: puzzles-with-all.txt
+  tasks:
+    - shell: touch ~/puzzle-{{ item }}-all.txt
+      with_lines: "{{ repo.loc }}/{{ puzzles_with_all }}"
