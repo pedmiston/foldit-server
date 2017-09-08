@@ -1,4 +1,5 @@
 ---
+# Find available solutions on <analytics.fold.it>
 - hosts: analytics.fold.it
   remote_user: pierce
   force_handlers: yes
@@ -10,7 +11,8 @@
       script: bin/find-top-solutions > ~/{{ top_paths }}
       args:
         executable: /bin/bash
-      async:
+      async: 20*60
+      poll: 5*60
       notify:
         - clean up
 
@@ -18,7 +20,8 @@
       script: bin/find-all-solutions > ~/{{ all_paths }}
       args:
         executable: /bin/bash
-      async:
+      async: 20*60
+      poll: 5*60
       notify:
         - clean up
 
