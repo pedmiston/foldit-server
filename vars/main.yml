@@ -3,6 +3,8 @@ repo:
     url: "https://github.com/pedmiston/foldit-server.git"
     loc: "~/foldit-server"
 
+mysql_db_name: Foldit
+
 # These paths will exist on <analytics.fold.it> and on <foldit>
 puzzle_dir: "data-raw/puzzle-{{ puzzle_id }}"
 available_solutions: "{{ puzzle_dir }}/available_solutions.txt"
