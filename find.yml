@@ -2,9 +2,8 @@
 # Find available solutions on <analytics.fold.it>
 - hosts: analytics.fold.it
   remote_user: pierce
-  force_handlers: yes
   vars:
-    - paths_dir: "{{ repo.loc }}/solution-paths"
+    - paths_dir: "{{ repo.loc }}/available-solutions"
     - top_paths: top-solution-paths.txt
     - all_paths: all-solution-paths.txt
   vars_files:
