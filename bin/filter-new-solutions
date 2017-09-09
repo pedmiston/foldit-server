@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+AVAILABLE=$1
+COMPLETED=$2
+comm -23 <(sort ${AVAILABLE}) <(sort ${COMPLETED})

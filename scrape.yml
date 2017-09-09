@@ -1,38 +1,31 @@
 ---
-- hosts: analytics.fold.it
-  remote_user: pierce
-  force_handlers: yes
-  vars:
-    - top_paths: top-solution-paths.txt
-    - all_paths: all-solution-paths.txt
+# Find available solutions on <analytics.fold.it>
+# - hosts: analytics.fold.it
+#   remote_user: pierce
+#   vars_files:
+#     - vars/main.yml
+#   tasks:
+#     - include: tasks/find_top_solutions.yml
+#     - include: tasks/find_all_solutions.yml
+
+# Create the workload on <foldit>
+- hosts: localhost
+  connection: local
   vars_files:
     - vars/main.yml
   tasks:
-    - name: Find available 'top/' solutions
-      script: bin/find-top-solutions > {{ repo.loc }}/{{ top_paths }}
-      args:
-        executable: /bin/bash
-      async:
-      notify:
-        - clean up
+    - include: tasks/create_workload.yml
 
-    - name: Find available 'all/' solutions
-      script: bin/find-all-solutions > {{ repo.loc }}/{{ all_paths }}
-      args:
-        executable: /bin/bash
-      async:
-      notify:
-        - clean up
+# Iterate through the workload on <analytics.fold.it>
+- hosts: analytics.fold.it
+  remote_user: pierce
+  vars_files:
+    - vars/main.yml
+  tasks:
+    - name: Load available workloads
+      local_action: command ls {{ workload_dir }} -name "*.txt"
+      register: workload_filenames
 
-    - name: Retrieve available solutions
-      fetch: src=~/{{ item }} dest={{ item }} flat=yes
-      with_items:
-        - "{{ top_paths }}"
-        - "{{ all_paths }}"
-
-  handlers:
-    - name: clean up
-      file: path={{ item }} state=absent
-      with_items:
-        - "{{ top_paths }}"
-        - "{{ all_paths }}"
+    - include: tasks/get_solutions.yml
+      with_items: "{{ workload_filenames.stdout_lines }}"
+      when: len(workload_filenames.stdout_lines) > 0

@@ -5,7 +5,10 @@ repo:
 
 mysql_db_name: Foldit
 
-# These paths will exist on <analytics.fold.it> and on <foldit>
-puzzle_dir: "data-raw/puzzle-{{ puzzle_id }}"
-available_solutions: "{{ puzzle_dir }}/available_solutions.txt"
-solution_data:       "{{ puzzle_dir }}/foldit.db"
+top_solutions: top-solutions.txt
+all_solutions: all-solutions.txt
+available_solutions: available-solutions.txt
+completed_solutions: completed-solution.txt
+workload_dir: "{{ repo.loc }}/workload"
+batch_size: 50000
+results_dir: "{{ repo.loc }}/data"

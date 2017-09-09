@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+IN=$1
+BATCH=$2
+split -l ${BATCH} ${IN}

@@ -1,9 +1,9 @@
 ---
 - name: Find available 'top/' solutions
-  script: bin/find-top-solutions > ~/{{ top_paths }}
+  script: bin/find-top-solutions > ~/{{ top_solutions }}
 
 - name: Fetch list of available top solution files
-  fetch: src=~/{{ top_paths }} dest={{ paths_dir }}/{{ top_paths }} flat=yes
+  fetch: src=~/{{ top_solutions }} dest={{ repo.loc }}/{{ top_solutions }} flat=yes
 
 - name: Delete the file with top solution files
-  file: path=~/{{ top_paths }} state=absent
+  file: path=~/{{ top_solutions }} state=absent
