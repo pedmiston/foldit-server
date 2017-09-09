@@ -1,0 +1,16 @@
+---
+- name: Install MySQL
+  apt: name=mysql-server
+
+- name: Configure MySQL
+  include_role:
+    name: geerlingguy.mysql
+  vars:
+    mysql_root_password: "{{ mysql_root_password }}"
+    mysql_databases:
+      - name: "{{ mysql_db_name }}"
+    mysql_users:
+      - name: foldit
+        host: "%"
+        password: "{{ mysql_foldit_password }}"
+        priv: "{{ mysql_db_name }}.*:ALL"

@@ -23,22 +23,9 @@
         hour: "0"
         job: "cd {{ repo.loc }} && git pull -q"
         user: "{{ ansible_user_id }}"
+        state: absent
 
-    - name: Install MySQL
-      apt: name=mysql-server
-
-    - name: Configure MySQL
-      include_role:
-        name: geerlingguy.mysql
-      vars:
-        mysql_root_password: "{{ mysql_root_password }}"
-        mysql_databases:
-          - name: "{{ mysql_db_name }}"
-        mysql_users:
-          - name: foldit
-            host: "%"
-            password: "{{ mysql_foldit_password }}"
-            priv: "{{ mysql_db_name }}.*:ALL"
+    # - include: tasks/install_mysql.yml
 
     - include: tasks/install_foldit_extractor.yml
 
