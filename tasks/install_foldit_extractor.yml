@@ -1,0 +1,6 @@
+---
+- include_role:
+    name: go
+
+- name: Go get foldit extractor
+  shell: go get -u github.com/pedmiston/foldit

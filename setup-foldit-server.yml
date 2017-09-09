@@ -40,5 +40,7 @@
             password: "{{ mysql_foldit_password }}"
             priv: "{{ mysql_db_name }}.*:ALL"
 
+    - include: tasks/install_foldit_extractor.yml
+
     # TODO: setup py venv
     # TODO: template .profile

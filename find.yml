@@ -11,30 +11,12 @@
   tasks:
     - name: Ensure dest directory exists
       file: path={{ paths_dir }} state=directory
+    - include: tasks/find_top_solutions.yml
+    - include: tasks/find_all_solutions.yml
 
-    - name: Find available 'top/' solutions
-      script: bin/find-top-solutions > ~/{{ top_paths }}
-
-    - name: Fetch list of available top solution files
-      fetch: src=~/{{ top_paths }} dest={{ paths_dir }}/{{ top_paths }} flat=yes
-
-    - name: Delete the file with top solution files
-      file: path=~/{{ top_paths }} state=absent
-
-    - name: Find puzzles with 'all/' directory
-      script: bin/find-puzzles-with-all
-      register: find_puzzles_with_all_output
-
-    - name: Find all solutions for each puzzle
-      script: bin/find-all-solutions {{ item }} > ~/puzzle-{{ item }}-all.txt
-      with_items: "{{ find_puzzles_with_all_output.stdout_lines }}"
-
-    - name: Fetch lists of solution files for each puzzle with 'all/'
-      fetch: src=~/puzzle-{{ item }}-all.txt dest={{ paths_dir }}/puzzle-{{ item }}-all.txt flat=yes
-      with_items: "{{ find_puzzles_with_all_output.stdout_lines }}"
-
-    - name: Delete files of solution filepaths for each puzzle with 'all/'
-      shell: rm ~/puzzle-*-all.txt
-
-    - name: Combine all files of solution filepaths for 'all/' puzzles
-      local_action: shell cat {{ paths_dir }}/puzzle-*-all.txt > {{ paths_dir }}/{{ all_paths }} && rm {{ paths_dir }}/puzzle-*-all.txt
+- hosts: localhost
+  connection: local
+  vars_files:
+    - vars/main.yml
+  tasks:
+    - include: tasks/install_foldit_extractor.yml
