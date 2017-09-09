@@ -10,4 +10,7 @@
   script: ~/go/bin/foldit -paths ~/{{ workload }} -dest ~/{{ results }}
 
 - name: Download the data
-  fetch: src=~/{{ results }} dest={{ data_dir }}/{{ results }} flat=yes
+  fetch: src=~/{{ results }} dest={{ results_dir }}/{{ results }} flat=yes
+
+- name: Delete the results
+  file: path=~/{{ results }} state=absent

@@ -16,17 +16,7 @@
         repo: "{{ repo.url }}"
         dest: "{{ repo.loc }}"
 
-    - name: Manage crontab to update the repo
-      cron:
-        name: "update foldit-server repo"
-        minute: "0"
-        hour: "0"
-        job: "cd {{ repo.loc }} && git pull -q"
-        user: "{{ ansible_user_id }}"
-        state: absent
-
-    # - include: tasks/install_mysql.yml
-
+    - include: tasks/install_mysql.yml
     - include: tasks/install_foldit_extractor.yml
 
     # TODO: setup py venv
