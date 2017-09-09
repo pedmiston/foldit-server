@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
 IN=$1
 BATCH=$2
-split -l ${BATCH} ${IN}
+DIR=$3
+mkdir -p ${DIR}
+if ls ${IN}*.txt 1> /dev/null 2>$1; then
+  split -l ${BATCH} ${IN} workload
+  mv workload*.txt ${DIR}/
+fi

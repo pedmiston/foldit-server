@@ -1,12 +1,14 @@
 ---
 # Find available solutions on <analytics.fold.it>
-# - hosts: analytics.fold.it
-#   remote_user: pierce
-#   vars_files:
-#     - vars/main.yml
-#   tasks:
-#     - include: tasks/find_top_solutions.yml
-#     - include: tasks/find_all_solutions.yml
+- hosts: analytics.fold.it
+  remote_user: pierce
+  vars_files:
+    - vars/main.yml
+  tasks:
+    - include: tasks/find_top_solutions.yml
+    - include: tasks/find_all_solutions.yml
+    - name: Combine available solutions
+      local_action: shell cat {{ top_solutions }} {{ all_solutions }} > {{ available_solutions }} && rm {{ top_solutions }} {{ all_solutions }}
 
 # Create the workload on <foldit>
 - hosts: localhost
@@ -23,9 +25,10 @@
     - vars/main.yml
   tasks:
     - name: Load available workloads
-      local_action: command ls {{ workload_dir }} -name "*.txt"
+      local_action: command ls {{ workload_dir }}
       register: workload_filenames
 
-    - include: tasks/get_solutions.yml
+    - name: Get solutions in batches
+      include: tasks/get_solutions.yml
       with_items: "{{ workload_filenames.stdout_lines }}"
       when: len(workload_filenames.stdout_lines) > 0
