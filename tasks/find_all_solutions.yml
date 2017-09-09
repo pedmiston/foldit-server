@@ -3,16 +3,16 @@
   script: bin/find-puzzles-with-all
   register: find_puzzles_with_all_output
 
-- name: Find all solutions for each puzzle
-  script: bin/find-all-solutions {{ item }} > ~/puzzle-{{ item }}-all.txt
-  with_items: "{{ find_puzzles_with_all_output.stdout_lines }}"
+#- name: Find all solutions for each puzzle
+#  script: bin/find-all-solutions {{ item }} > ~/puzzle-{{ item }}-all.txt
+#  with_items: "{{ find_puzzles_with_all_output.stdout_lines }}"
 
 - name: Fetch lists of solution files for each puzzle with 'all/'
-  fetch: src=~/puzzle-{{ item }}-all.txt dest={{ paths_dir }}/puzzle-{{ item }}-all.txt flat=yes
+  fetch: src=~/puzzle-{{ item }}-all.txt dest=puzzle-{{ item }}-all.txt flat=yes
   with_items: "{{ find_puzzles_with_all_output.stdout_lines }}"
 
 - name: Delete files of solution filepaths for each puzzle with 'all/'
   shell: rm ~/puzzle-*-all.txt
 
 - name: Combine all files of solution filepaths for 'all/' puzzles
-  local_action: shell cat {{ paths_dir }}/puzzle-*-all.txt > {{ paths_dir }}/{{ all_paths }} && rm {{ paths_dir }}/puzzle-*-all.txt
+  local_action: shell cat puzzle-*-all.txt > {{ all_solutions }} && rm puzzle-*-all.txt
