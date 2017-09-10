@@ -3,15 +3,6 @@
   vars:
     - state: present
   tasks:
-    - name: Manage crontab for finding available solution files
-      cron:
-        name: find available solution files
-        job: source ~/.profile && cd {{ repo.loc }} && ansible-playbook find.yml
-        minute: 0
-        hour: 5
-        user: "{{ ansible_user_id }}"
-        state: "{{ state }}"
-
     - name: Manage crontab to scrape solution files
       cron:
         name: "scrape foldit solutions"
