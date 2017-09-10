@@ -7,7 +7,7 @@
   copy: src={{ workload_dir }}/{{ workload }} dest=~/{{ workload }}
 
 - name: Run the puzzle solutions through the parsing script
-  script: ~/go/bin/foldit -i ~/{{ workload }} -o ~/{{ results }}
+  script: ~/go/bin/foldit -o ~/{{ results }} ~/{{ workload }}
 
 - name: Download the data
   fetch: src=~/{{ results }} dest={{ results_dir }}/{{ results }} flat=yes
