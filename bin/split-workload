@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
+# split-workload splits a big text file (the workload)
+# into a bunch of smaller text files.
 IN=$1
 BATCH=$2
 DIR=$3
 mkdir -p ${DIR}
-if ls ${IN}*.txt 1> /dev/null 2>$1; then
-  split -l ${BATCH} ${IN} workload
-  mv workload*.txt ${DIR}/
-fi
+split -l ${BATCH} ${IN} workload-
+mv workload-* ${DIR}/

@@ -1,9 +1,12 @@
 ---
-- name: Create a list of solutions already downloaded
-  script: bin/list-solution-filenames {{ results_dir }} > {{ completed_solutions }}
-
-- name: Filter new solutions from available
-  script: bin/filter-new-solutions {{ available_solutions }} {{ completed_solutions }} > {{ remaining_solutions }}
+#- name: Create a list of solutions already downloaded
+#  script: bin/list-solution-filenames {{ results_dir }} > {{ completed_solutions }}
+#
+#- name: Combine available solutions
+#  local_action: shell cat {{ top_solutions }} {{ all_solutions }} > {{ available_solutions }}
+#
+#- name: Filter new solutions from available
+#  script: bin/filter-new-solutions {{ available_solutions }} {{ completed_solutions }} > {{ remaining_solutions }}
 
 - name: Split remaining solutions into batches
   script: bin/split-workload {{ remaining_solutions }} {{ batch_size }} {{ workload_dir }}

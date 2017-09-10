@@ -8,7 +8,7 @@ mysql_db_name: Foldit
 top_solutions: top-solutions.txt
 all_solutions: all-solutions.txt
 available_solutions: available-solutions.txt
-completed_solutions: completed-solution.txt
+completed_solutions: completed-solutions.txt
 remaining_solutions: remaining-solutions.txt
 workload_dir: "{{ repo.loc }}/workload"
 batch_size: 50000

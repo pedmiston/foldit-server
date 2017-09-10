@@ -7,8 +7,6 @@
   tasks:
     - include: tasks/find_top_solutions.yml
     - include: tasks/find_all_solutions.yml
-    - name: Combine available solutions
-      local_action: shell cat {{ top_solutions }} {{ all_solutions }} > {{ available_solutions }} && rm {{ top_solutions }} {{ all_solutions }}
 
 # Create the workload on <foldit>
 - hosts: localhost
