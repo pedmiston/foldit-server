@@ -23,10 +23,10 @@
     - vars/main.yml
   tasks:
     - name: Go get latest version of foldit program
-      local_action: shell go get github.com/pedmiston/foldit
+      local_action: shell go build -o bin/foldit github.com/pedmiston/foldit
 
     - name: Load available workloads
-      local_action: shell ls {{ workload_dir }} | head -n 1
+      local_action: shell ls {{ workload_dir }} | head -n 2
       register: workload_filenames
 
     - name: Get solutions in batches

@@ -10,6 +10,7 @@ all_solutions: all-solutions.txt
 available_solutions: available-solutions.txt
 completed_solutions: completed-solutions.txt
 remaining_solutions: remaining-solutions.txt
+errors: errors.txt
 workload_dir: "{{ repo.loc }}/workload"
-batch_size: 50000
+batch_size: 10000
 results_dir: "{{ repo.loc }}/data"
