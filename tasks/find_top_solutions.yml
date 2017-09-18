@@ -3,7 +3,7 @@
   script: bin/find-top-solutions > ~/{{ top_solutions }}
 
 - name: Fetch list of available top solution files
-  fetch: src=~/{{ top_solutions }} dest={{ repo.loc }}/{{ top_solutions }} flat=yes
+  fetch: src=~/{{ top_solutions }} dest={{ run_dir }}/{{ top_solutions }} flat=yes
 
 - name: Delete the file with top solution files
   file: path=~/{{ top_solutions }} state=absent

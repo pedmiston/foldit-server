@@ -7,10 +7,13 @@
   copy: src={{ workload_dir }}/{{ workload }} dest=~/{{ workload }}
 
 - name: Run the puzzle solutions through the parsing script
-  script: bin/foldit -o ~/{{ results }} ~/{{ workload }}
+  shell: ~/foldit ~/{{ workload }} > {{ results }} 2> ~/{{ errors }}
 
-- name: Download the data
-  fetch: src=~/{{ results }} dest={{ results_dir }}/{{ results }} flat=yes
+- name: Download the data and any errors
+  fetch: src=~/{{ item }} dest={{ results_dir }}/{{ item }} flat=yes
+  with_items:
+    - "{{ results }}"
+    - "{{ errors }}"
 
 - name: Delete leftover files on analytics server
   file: path={{ item }} state=absent

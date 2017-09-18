@@ -5,8 +5,12 @@
   vars_files:
     - vars/main.yml
   tasks:
+    - name: Make dir for this run
+      local_action: file={{ run_dir }} state=directory
     - include: tasks/find_top_solutions.yml
     - include: tasks/find_all_solutions.yml
+    - name: Combine all available solutions
+      local_action: shell cd {{ run_dir }} && cat {{ top_solutions }} {{ all_solutions }} > {{ available_solutions }}
 
 # Create the workload on <foldit>
 - hosts: localhost
@@ -24,6 +28,14 @@
   tasks:
     - name: Go get latest version of foldit program
       local_action: shell go build -o bin/foldit github.com/pedmiston/foldit
+
+    # This could be accomplished with the script module,
+    # but this way it's easier to find when testing.
+    - name: Move the foldit program to the analytics server
+      copy: src=bin/foldit dest=~/foldit
+
+    - name: Remove the local copy of the foldit program
+      local_action: file path=bin/foldit state=absent
 
     - name: Load available workloads
       local_action: shell ls {{ workload_dir }} | head -n 2
