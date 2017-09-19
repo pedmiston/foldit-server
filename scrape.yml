@@ -1,4 +1,19 @@
 ---
+# Initiate run
+- hosts: localhost
+  connection: local
+  tasks:
+    - set_fact:
+        run_dir: {{ data_dir }}/{{ ansible_date_time.date }}
+
+    - stat: path={{ data_dir }}/{{ ansible_date_time.date }}
+      register: run_dir_info
+
+    - set_fact:
+        run_id: {{ 
+    - set_fact:
+        run_id: {{ ansible_date_time.date }}
+  
 # Find available solutions on <analytics.fold.it>
 - hosts: analytics.fold.it
   remote_user: pierce
@@ -6,11 +21,12 @@
     - vars/main.yml
   tasks:
     - name: Make dir for this run
-      local_action: file={{ run_dir }} state=directory
+      local_action: file path={{ run_dir }} state=directory
     - include: tasks/find_top_solutions.yml
-    - include: tasks/find_all_solutions.yml
+#    - include: tasks/find_all_solutions.yml
     - name: Combine all available solutions
       local_action: shell cd {{ run_dir }} && cat {{ top_solutions }} {{ all_solutions }} > {{ available_solutions }}
+      ignore_errors: yes
 
 # Create the workload on <foldit>
 - hosts: localhost
@@ -21,33 +37,33 @@
     - include: tasks/create_workload.yml
 
 # Iterate through the workload on <analytics.fold.it>
-- hosts: analytics.fold.it
-  remote_user: pierce
-  vars_files:
-    - vars/main.yml
-  tasks:
-    - name: Go get latest version of foldit program
-      local_action: shell go build -o bin/foldit github.com/pedmiston/foldit
-
-    # This could be accomplished with the script module,
-    # but this way it's easier to find when testing.
-    - name: Move the foldit program to the analytics server
-      copy: src=bin/foldit dest=~/foldit
-
-    - name: Remove the local copy of the foldit program
-      local_action: file path=bin/foldit state=absent
-
-    - name: Load available workloads
-      local_action: shell find {{ run_dir }}/ -name "batch-*.txt" | head -n 2
-      register: workload_filenames
-
-    - name: Get solutions in batches
-      include: tasks/get_solutions.yml
-      with_items: "{{ workload_filenames.stdout_lines }}"
-      when: workload_filenames.stdout_lines | length > 0
-
-    - name: Combine all the batches into a single json data file for the run.
-      local_action: shell cat {{ run_dir }}/batch-*.json > {{ data_dir }}/run-{{ run_id }}.json
+#- hosts: analytics.fold.it
+#  remote_user: pierce
+#  vars_files:
+#    - vars/main.yml
+#  tasks:
+#    - name: Go get latest version of foldit program
+#      local_action: shell go build -o bin/foldit github.com/pedmiston/foldit
+#
+#    # This could be accomplished with the script module,
+#    # but this way it's easier to find when testing.
+#    - name: Move the foldit program to the analytics server
+#      copy: src=bin/foldit dest=~/foldit
+#
+#    - name: Remove the local copy of the foldit program
+#      local_action: file path=bin/foldit state=absent
+#
+#    - name: Load available workloads
+#      local_action: shell find {{ run_dir }}/ -name "batch-*.txt" | head -n 2
+#      register: workload_filenames
+#
+#    - name: Get solutions in batches
+#      include: tasks/get_solutions.yml
+#      with_items: "{{ workload_filenames.stdout_lines }}"
+#      when: workload_filenames.stdout_lines | length > 0
+#
+#    - name: Combine all the batches into a single json data file for the run.
+#      local_action: shell cat {{ run_dir }}/batch-*.json > {{ data_dir }}/run-{{ run_id }}.json
 
     # - name: Delete all batch files after they've been combined.
     #   local_action: shell rm {{ run_dir }}/batch-*.json

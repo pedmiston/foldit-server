@@ -14,8 +14,4 @@ errors: errors.txt
 
 batch_size: 1000
 
-# I hope this is only set once but it may not be!!!
-run_id: "{{ ansible_epoch }}"
-
 data_dir: "{{ repo.loc }}/data"
-run_dir: "{{ data_dir }}/{{ run_id }}"
