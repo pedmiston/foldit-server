@@ -15,3 +15,6 @@ errors: errors.txt
 batch_size: 1000
 
 data_dir: "{{ repo.loc }}/data"
+run_dir: "{{ data_dir }}/{{ run_id }}"
+
+tmp_vars_file: vars/tmp.yml

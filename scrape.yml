@@ -1,42 +1,44 @@
 ---
-# Initiate run
+# Initiate run by setting the run id
 - hosts: localhost
   connection: local
-  tasks:
-    - set_fact:
-        run_dir: {{ data_dir }}/{{ ansible_date_time.date }}
-
-    - stat: path={{ data_dir }}/{{ ansible_date_time.date }}
-      register: run_dir_info
-
-    - set_fact:
-        run_id: {{ 
-    - set_fact:
-        run_id: {{ ansible_date_time.date }}
-  
-# Find available solutions on <analytics.fold.it>
-- hosts: analytics.fold.it
-  remote_user: pierce
   vars_files:
     - vars/main.yml
   tasks:
-    - name: Make dir for this run
-      local_action: file path={{ run_dir }} state=directory
-    - include: tasks/find_top_solutions.yml
+    - shell: bin/determine-run-id {{ data_dir }}
+      register: run_id_out
+
+    - lineinfile:
+        path: {{ tmp_vars_file }}
+        regexp: '^run_id:'
+        line: 'run_id: {{ run_id_out.stdout }}'
+
+    - file: path={{ run_dir }} state=directory
+
+# # Find available solutions on <analytics.fold.it>
+# - hosts: analytics.fold.it
+#   remote_user: pierce
+#   vars_files:
+#     - vars/main.yml
+#     - "{{ tmp_vars_file }}"
+#   tasks:
+#     - name: Make dir for this run
+#       local_action: file path={{ run_dir }} state=directory
+#     - include: tasks/find_top_solutions.yml
 #    - include: tasks/find_all_solutions.yml
-    - name: Combine all available solutions
-      local_action: shell cd {{ run_dir }} && cat {{ top_solutions }} {{ all_solutions }} > {{ available_solutions }}
-      ignore_errors: yes
+    # - name: Combine all available solutions
+    #   local_action: shell cd {{ run_dir }} && cat {{ top_solutions }} {{ all_solutions }} > {{ available_solutions }}
+    #   ignore_errors: yes
 
-# Create the workload on <foldit>
-- hosts: localhost
-  connection: local
-  vars_files:
-    - vars/main.yml
-  tasks:
-    - include: tasks/create_workload.yml
+# # Create the workload on <foldit>
+# - hosts: localhost
+#   connection: local
+#   vars_files:
+#     - vars/main.yml
+#   tasks:
+#     - include: tasks/create_workload.yml
 
-# Iterate through the workload on <analytics.fold.it>
+# # Iterate through the workload on <analytics.fold.it>
 #- hosts: analytics.fold.it
 #  remote_user: pierce
 #  vars_files:
