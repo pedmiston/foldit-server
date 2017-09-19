@@ -5,19 +5,23 @@
   vars_files:
     - vars/main.yml
   tasks:
-    - shell: source ~/.profile && bin/determine-run-id {{ data_dir }}
+    - name: Determine the next run id
+      shell: source ~/.profile && bin/determine-run-id {{ data_dir }}
       register: run_id_out
       args:
         executable: /bin/bash
 
-    - set_fact: run_id={{ run_id_out.stdout }}
+    - name: Set the run_id ansible fact
+      set_fact: run_id={{ run_id_out.stdout }}
 
-    - lineinfile:
+    - name: Hardcode the run id variable in the tmp vars file
+      lineinfile:
         path: "{{ tmp_vars_file }}"
         regexp: "^run_id:"
         line: "run_id: {{ run_id }}"
 
-    - file: path={{ run_dir }} state=directory
+    - name: Create the data dir for this run
+      file: path={{ run_dir }} state=directory
 
 # Find available solutions on <analytics.fold.it>
 - hosts: analytics.fold.it
