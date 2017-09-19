@@ -38,10 +38,16 @@
       local_action: file path=bin/foldit state=absent
 
     - name: Load available workloads
-      local_action: shell ls {{ workload_dir }} | head -n 2
+      local_action: shell find {{ run_dir }}/ -name "batch-*.txt" | head -n 2
       register: workload_filenames
 
     - name: Get solutions in batches
       include: tasks/get_solutions.yml
       with_items: "{{ workload_filenames.stdout_lines }}"
       when: workload_filenames.stdout_lines | length > 0
+
+    - name: Combine all the batches into a single json data file for the run.
+      local_action: shell cat {{ run_dir }}/batch-*.json > {{ data_dir }}/run-{{ run_id }}.json
+
+    # - name: Delete all batch files after they've been combined.
+    #   local_action: shell rm {{ run_dir }}/batch-*.json

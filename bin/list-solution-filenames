@@ -2,8 +2,8 @@
 DATA_DIR=$1
 COMPLETED=$2
 mkdir -p ${DATA_DIR}
-if ls ${DATA_DIR}/*.json 1> /dev/null 2>$1; then
-  cat ${DATA_DIR}/*.json
-  # extract filenames!
-  # ...
-fi
+
+all_runs=`find ${DATA_DIR}/ -name "run-*.json"`
+for i in ${all_runs}; do
+  echo "$i"
+done

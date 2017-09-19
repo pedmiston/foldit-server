@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # split-workload splits a big text file (the workload)
 # into a bunch of smaller text files.
-IN=$1
-BATCH=$2
-DIR=$3
-mkdir -p ${DIR}
-split -l ${BATCH} ${IN} workload-
-mv workload-* ${DIR}/
+# Usage: split-workload [workload] [batch_size] [dst_dir]
+workload=$1
+batch_size=$2
+dst_dir=$3
+mkdir -p ${dst_dir}
+split -l ${batch_size} ${workload} batch-
+mv batch-* ${dst_dir}/

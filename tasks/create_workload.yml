@@ -6,4 +6,4 @@
   script: bin/filter-new-solutions {{ available_solutions }} {{ completed_solutions }} > {{ remaining_solutions }}
 
 - name: Split remaining solutions into batches
-  script: bin/split-workload {{ remaining_solutions }} {{ batch_size }} {{ workload_dir }}
+  script: bin/split-workload {{ remaining_solutions }} {{ batch_size }} {{ run_dir }}

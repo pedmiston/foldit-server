@@ -1,12 +1,9 @@
 ---
 repo:
-    url: "https://github.com/pedmiston/foldit-server.git"
-    loc: "~/foldit-server"
+  url: "https://github.com/pedmiston/foldit-server.git"
+  loc: "~/foldit-server"
 
 mysql_db_name: Foldit
-
-# I hope this is only set once but it may not be!!!
-run_id: "{{ ansible_epoch }}"
 
 top_solutions: top-solutions.txt
 all_solutions: all-solutions.txt
@@ -15,6 +12,10 @@ completed_solutions: completed-solutions.txt
 remaining_solutions: remaining-solutions.txt
 errors: errors.txt
 
-batch_size: 10000
+batch_size: 1000
+
+# I hope this is only set once but it may not be!!!
+run_id: "{{ ansible_epoch }}"
+
 data_dir: "{{ repo.loc }}/data"
 run_dir: "{{ data_dir }}/{{ run_id }}"

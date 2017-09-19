@@ -1,11 +1,13 @@
 digraph {
   node[fontname=Helvetica];
   rankdir = BT;
+
   localhost -> foldit -> analytics_fold_it;
   analytics_fold_it -> foldit;
   { rank=same; foldit, mysql; }
   foldit -> mysql[minlen=2];
   mysql -> localhost[constraint=false];
 
+  foldit[label="foldit"];
   analytics_fold_it[label="analytics.fold.it"];
 }
