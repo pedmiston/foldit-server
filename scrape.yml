@@ -5,13 +5,17 @@
   vars_files:
     - vars/main.yml
   tasks:
-    - shell: bin/determine-run-id {{ data_dir }}
+    - shell: source ~/.profile && bin/determine-run-id {{ data_dir }}
       register: run_id_out
+      args:
+        executable: /bin/bash
+
+    - set_fact: run_id={{ run_id_out.stdout }}
 
     - lineinfile:
-        path: {{ tmp_vars_file }}
-        regexp: '^run_id:'
-        line: 'run_id: {{ run_id_out.stdout }}'
+        path: "{{ tmp_vars_file }}"
+        regexp: "^run_id:"
+        line: "run_id: {{ run_id }}"
 
     - file: path={{ run_dir }} state=directory
 

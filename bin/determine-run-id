@@ -11,4 +11,4 @@ try:
                 for f in unipath.Path(d).listdir('run-*'))
 except ValueError:
     n = 1
-sys.stdout.write(f'{n}')
+sys.stdout.write("%s" % n)
