@@ -1,7 +1,8 @@
 ---
 - set_fact:
     workload: "{{ item }}"
-    results: "{{ item | splitext | first }}.json"
+    results: "{{ item }}.json"
+    errors: "{{ item }}-errors.txt"
 
 - name: Copy the workload to the analytics server
   copy: src={{ run_dir }}/{{ workload }} dest=~/{{ workload }}
@@ -21,6 +22,8 @@
     - "~/{{ workload }}"
     - "~/{{ results }}"
     - "~/{{ errors }}"
+  when: cleanup
 
 - name: Delete workload file on foldit machine
   local_action: file path={{ run_dir }}/{{ workload }} state=absent
+  when: cleanup
