@@ -2,12 +2,13 @@
 - hosts: foldit
   vars:
     - state: present
+  vars_files:
+    - vars/main.yml
   tasks:
     - name: Manage crontab to scrape solution files
       cron:
         name: "scrape foldit solutions"
-        minute: "0"
-        hour: "0"
+        minute: "*/30"
         job: "source ~/.profile && cd {{ repo.loc }} && ansible-playbook scrape.yml"
         user: "{{ ansible_user_id }}"
         state: "{{ state }}"
