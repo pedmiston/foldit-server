@@ -11,7 +11,7 @@
 
 - name: Remove run_id from tmp vars file
   lineinfile:
-    path: "{{ tmp_vars_file }}"
+    path: "{{ run_id_vars_file }}"
     regexp: "^run_id:"
     line: "run_id: {{ run_id }}"
     state: absent

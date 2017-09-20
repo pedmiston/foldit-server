@@ -10,7 +10,7 @@
 
 - name: Hardcode run id in tmp vars file
   lineinfile:
-    path: "{{ tmp_vars_file }}"
+    path: "{{ run_id_vars_file }}"
     regexp: "^run_id:"
     line: "run_id: {{ run_id }}"
 
