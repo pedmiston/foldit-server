@@ -4,7 +4,7 @@
   register: find_puzzles_with_all_output
 
 - name: Find all solutions for each puzzle
-  include: tasks/find_all_solutions_for_puzzle.yml
+  include: tasks/fetch_all_solutions_for_puzzle.yml
   with_items: "{{ find_puzzles_with_all_output.stdout_lines }}"
   loop_control:
     loop_var: puzzle_id
