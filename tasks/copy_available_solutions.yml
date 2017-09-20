@@ -1,11 +1,11 @@
 ---
 - name: Record number of remaining solutions from previous run
-  shell: wc -l data/run-{{ run_id - 1 }}/remaining-solutions.txt | awk '{ print($1) }'
+  shell: wc -l data/run-{{ run_id | int - 1 }}/remaining-solutions.txt | awk '{ print($1) }'
   register: prev_run_remaining
 
 - name: Copy available solution paths from previous run
-  shell: cd data/run-{{ run_id }} && cp ../{{ run_id - 1 }}/{{ item }} ./{{ item }}
+  shell: cd data/run-{{ run_id }} && cp ../run-{{ run_id | int - 1 }}/{{ item }} ./{{ item }}
   with_items:
-    - {{ top_solutions }}
-    - {{ all_solutions }}
-  when: prev_run_remaining|int > (n_batchs * batch_size)
+    - "{{ top_solutions }}"
+    - "{{ all_solutions }}"
+  when: (prev_run_remaining.stdout|int) > (n_batches * batch_size)
