@@ -1,5 +1,7 @@
 ---
-- name: Ensure only a single ansible-playbook process is running
-  shell: ps | grep "ansible-playbook scrape.yml" | wc -l
-  register: processes_info
-  failed_when: processes_info.stdout|int > 4
+- name: Try loading the run id
+  include_vars: file=vars/run_id.yml
+
+- name: Ensure that a run isn't already taking place
+  fail: msg="run_id is set. If retrying, must pass retry=yes"
+  when: run_id is defined
