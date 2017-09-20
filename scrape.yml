@@ -5,7 +5,8 @@
   vars_files:
     - vars/main.yml
   tasks:
-    - include: tasks/initiate_run.yml
+    - include: tasks/check_status.yml
+    - include: tasks/increment_run_id.yml
       when: not retry
 
 # Find available solutions on <analytics.fold.it>
@@ -14,7 +15,7 @@
   vars_files:
     - vars/main.yml
   tasks:
-    - include: tasks/load_run_id.yml
+    - include_vars: file=vars/run_id.yml
     - include: tasks/find_available_solutions.yml
 
 # Create the workload on <foldit>
@@ -23,7 +24,7 @@
   vars_files:
     - vars/main.yml
   tasks:
-    - include: tasks/load_run_id.yml
+    - include_vars: file=vars/run_id.yml
     - include: tasks/create_workload.yml
 
 # Iterate through the workload on <analytics.fold.it>
@@ -32,14 +33,14 @@
   vars_files:
     - vars/main.yml
   tasks:
-    - include: tasks/load_run_id.yml
+    - include_vars: file=vars/run_id.yml
     - include: tasks/scrape_solutions.yml
- 
+
 # Cleanup
 - hosts: localhost
   connection: local
   vars_files:
     - vars/main.yml
   tasks:
-    - include: tasks/load_run_id.yml
+    - include_vars: file=vars/run_id.yml
     - include: tasks/cleanup.yml

@@ -1,0 +1,5 @@
+---
+- name: Ensure only a single ansible-playbook process is running
+  shell: ps | grep "ansible-playbook scrape.yml" | wc -l
+  register: processes_info
+  failed_when: processes_info.stdout|int > 4
