@@ -1,8 +1,7 @@
 ---
 - set_fact:
-    workload: "{{ item }}"
-    results: "{{ item }}.json"
-    errors: "{{ item }}-errors.txt"
+    results: "{{ workload }}.json"
+    errors: "{{ workload }}-errors.txt"
 
 - name: Copy the workload to the analytics server
   copy: src={{ run_dir }}/{{ workload }} dest=~/{{ workload }}

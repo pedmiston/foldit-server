@@ -1,9 +1,15 @@
 ---
 - name: Create a list of solutions already downloaded
-  script: bin/list-solution-filenames {{ data_dir }} > {{ run_dir }}/{{ completed_solutions }}
+  shell: source ~/.profile && bin/list-solution-filenames {{ data_dir }} > {{ run_dir }}/{{ completed_solutions }}
+  args:
+    executable: /bin/bash
 
 - name: Filter new solutions from available
-  script: bin/filter-new-solutions {{ available_solutions }} {{ completed_solutions }} > {{ remaining_solutions }}
+  shell: source ~/.profile && cd {{ run_dir }} && filter-new-solutions {{ available_solutions }} {{ completed_solutions }} > {{ remaining_solutions }}
+  args:
+    executable: /bin/bash
 
 - name: Split remaining solutions into batches
-  script: bin/split-workload {{ remaining_solutions }} {{ batch_size }} {{ run_dir }}
+  shell: source ~/.profile && cd {{ run_dir }} && split-workload {{ remaining_solutions }} {{ batch_size }}
+  args:
+    executable: /bin/bash

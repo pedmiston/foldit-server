@@ -5,19 +5,8 @@
   vars_files:
     - vars/main.yml
   tasks:
-    - shell: source ~/.profile && bin/determine-run-id {{ data_dir }}
-      register: run_id_out
-      args:
-        executable: /bin/bash
-
-    - set_fact: run_id={{ run_id_out.stdout }}
-
-    - lineinfile:
-        path: "{{ tmp_vars_file }}"
-        regexp: "^run_id:"
-        line: "run_id: {{ run_id }}"
-
-    - file: path={{ run_dir }} state=directory
+    - include: tasks/initiate_run.yml
+      when: not retry
 
 # Find available solutions on <analytics.fold.it>
 - hosts: analytics.fold.it
@@ -26,8 +15,20 @@
     - vars/main.yml
     - vars/tmp.yml
   tasks:
+    - name: Get info about top solutions file
+      local_action: stat path={{ run_dir }}/{{ top_solutions }}
+      register: top_solutions_info
+
     - include: tasks/find_top_solutions.yml
+      when: not top_solutions_info.stat.exists
+
+    - name: Get info about all solutions file
+      local_action: stat path={{ run_dir }}/{{ all_solutions }}
+      register: all_solutions_info
+
     - include: tasks/find_all_solutions.yml
+      when: not all_solutions_info.stat.exists
+
     - name: Combine all available solutions
       local_action: shell cd {{ run_dir }} && cat {{ top_solutions }} {{ all_solutions }} > {{ available_solutions }}
       ignore_errors: yes
@@ -48,37 +49,13 @@
     - vars/main.yml
     - vars/tmp.yml
   tasks:
-    - name: Get the latest version of the foldit program
-      local_action: shell go get -u github.com/pedmiston/foldit
-
-    - name: Build the foldit program
-      local_action: shell go build -o bin/foldit github.com/pedmiston/foldit
+    - include: tasks/scrape_solutions.yml
  
-    # This could be accomplished with the script module,
-    # but this way it's easier to find when testing.
-    - file: path=~/bin state=directory
-    - name: Move the foldit program to the analytics server
-      copy: src=bin/foldit dest=~/bin/foldit mode=u+x
- 
-    - name: Remove the local copy of the foldit program
-      local_action: file path=bin/foldit state=absent
-      when: cleanup
- 
-    - name: Load available workloads
-      local_action: shell ls {{ run_dir }} | grep "batch-*" | head -n 20
-      register: workload_filenames
- 
-    - name: Get solutions in batches
-      include: tasks/get_solutions.yml
-      with_items: "{{ workload_filenames.stdout_lines }}"
-      when: workload_filenames.stdout_lines | length > 0
- 
-    - name: Combine all the batches into a single json data file for the run.
-      local_action: shell cat {{ run_dir }}/batch-*.json > {{ data_dir }}/run-{{ run_id }}.json
-
-    - name: Combine all the batch errors into a single txt file for the run.
-      local_action: shell cat {{ run_dir }}/batch-*-errors.txt > {{ data_dir }}/run-{{ run_id }}-errors.txt
-
-    - name: Delete all batch files after they've been combined.
-      local_action: shell rm {{ run_dir }}/batch-*.json {{ run_dir }}/batch-*-errors.txt
-      when: cleanup
+# Cleanup
+- hosts: localhost
+  connection: local
+  vars_files:
+    - vars/main.yml
+    - vars/tmp.yml
+  tasks:
+    - include: tasks/cleanup.yml

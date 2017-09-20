@@ -1,0 +1,27 @@
+---
+- name: Get the latest version of the foldit program
+  local_action: shell go get -u github.com/pedmiston/foldit
+
+- name: Build the foldit program
+  local_action: shell go build -o bin/foldit github.com/pedmiston/foldit
+
+# This could be accomplished with the script module,
+# but this way it's easier to find when testing.
+- file: path=~/bin state=directory
+- name: Move the foldit program to the analytics server
+  copy: src=bin/foldit dest=~/bin/foldit mode=u+x
+
+- name: Remove the local copy of the foldit program
+  local_action: file path=bin/foldit state=absent
+  when: cleanup
+
+- name: Load available workloads
+  local_action: shell ls {{ run_dir }} | grep "batch-*" | head -n 100
+  register: workload_filenames
+
+- name: Get solutions in batches
+  include: tasks/get_solutions.yml
+  with_items: "{{ workload_filenames.stdout_lines }}"
+  when: workload_filenames.stdout_lines | length > 0
+  loop_control:
+    loop_var: workload

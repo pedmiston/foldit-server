@@ -18,3 +18,4 @@ run_dir: "{{ data_dir }}/run-{{ run_id }}"
 
 tmp_vars_file: vars/tmp.yml
 cleanup: yes
+retry: no

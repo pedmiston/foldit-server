@@ -1,9 +1,12 @@
-#!/usr/bin/env bash
-DATA_DIR=$1
-COMPLETED=$2
-mkdir -p ${DATA_DIR}
+#!/usr/bin/env python
+import sys
+import json
+import unipath
 
-all_runs=`find ${DATA_DIR}/ -name "run-*.json"`
-for i in ${all_runs}; do
-  echo "$i"
-done
+assert len(sys.argv) == 2, 'must provide data dir'
+data_dir = unipath.Path(sys.argv[1])
+
+for run in data_dir.listdir('run-*.json'):
+    for j in open(run, 'r'):
+        d = json.loads(j)
+        sys.stdout.write(d['Filepath']+'\n')
