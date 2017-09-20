@@ -4,15 +4,10 @@
   register: find_puzzles_with_all_output
 
 - name: Find all solutions for each puzzle
-  script: bin/find-all-solutions {{ item }} > ~/puzzle-{{ item }}-all.txt
+  include: tasks/find_all_solutions_for_puzzle.yml
   with_items: "{{ find_puzzles_with_all_output.stdout_lines }}"
-
-- name: Fetch lists of solution files for each puzzle with 'all/'
-  fetch: src=~/puzzle-{{ item }}-all.txt dest={{ run_dir }}/puzzle-{{ item }}-all.txt flat=yes
-  with_items: "{{ find_puzzles_with_all_output.stdout_lines }}"
-
-- name: Delete files of solution filepaths for each puzzle with 'all/'
-  shell: rm ~/puzzle-*-all.txt
+  loop_control:
+    loop_var: puzzle_id
 
 - name: Combine all files of solution filepaths for 'all/' puzzles
   local_action: shell cd {{ run_dir }} && cat puzzle-*-all.txt > {{ all_solutions }} && rm puzzle-*-all.txt

@@ -1,0 +1,12 @@
+---
+- name: Set filename for current puzzle
+  set_fact: solutions_file=puzzle-{{ puzzle_id }}-all.txt
+
+- name: Find all solutions for this puzzle
+  script: bin/find-all-solutions {{ puzzle_id }} > ~/{{ solutions_file }}
+
+- name: Fetch all solutions for this puzzle
+  fetch: src=~/{{ solutions_file }} dest={{ run_dir }}/{{ solutions_file }} flat=yes
+
+- name: Delete solutions file from <analytics.fold.it>
+  file: path=~/{{ solutions_file }} state=absent
