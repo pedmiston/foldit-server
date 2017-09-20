@@ -1,3 +1,0 @@
----
-- name: Load run id from tmp vars file
-  include_vars: file=vars/tmp.yml

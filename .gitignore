@@ -1,5 +1,3 @@
-*solutions.txt
-workload/
 .env
 *.swp
 *.retry
