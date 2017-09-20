@@ -13,33 +13,17 @@
   remote_user: pierce
   vars_files:
     - vars/main.yml
-    - vars/tmp.yml
   tasks:
-    - name: Get info about top solutions file
-      local_action: stat path={{ run_dir }}/{{ top_solutions }}
-      register: top_solutions_info
-
-    - include: tasks/find_top_solutions.yml
-      when: not top_solutions_info.stat.exists
-
-    - name: Get info about all solutions file
-      local_action: stat path={{ run_dir }}/{{ all_solutions }}
-      register: all_solutions_info
-
-    - include: tasks/find_all_solutions.yml
-      when: not all_solutions_info.stat.exists
-
-    - name: Combine all available solutions
-      local_action: shell cd {{ run_dir }} && cat {{ top_solutions }} {{ all_solutions }} > {{ available_solutions }}
-      ignore_errors: yes
+    - include: tasks/load_run_id.yml
+    - include: tasks/find_available_solutions.yml
 
 # Create the workload on <foldit>
 - hosts: localhost
   connection: local
   vars_files:
     - vars/main.yml
-    - vars/tmp.yml
   tasks:
+    - include: tasks/load_run_id.yml
     - include: tasks/create_workload.yml
 
 # Iterate through the workload on <analytics.fold.it>
@@ -47,8 +31,8 @@
   remote_user: pierce
   vars_files:
     - vars/main.yml
-    - vars/tmp.yml
   tasks:
+    - include: tasks/load_run_id.yml
     - include: tasks/scrape_solutions.yml
  
 # Cleanup
@@ -56,6 +40,6 @@
   connection: local
   vars_files:
     - vars/main.yml
-    - vars/tmp.yml
   tasks:
+    - include: tasks/load_run_id.yml
     - include: tasks/cleanup.yml
