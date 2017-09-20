@@ -8,6 +8,7 @@
     - include: tasks/check_status.yml
     - include: tasks/increment_run_id.yml
       when: not retry
+    - include: tasks/copy_available_solutions.yml
 
 # Find available solutions on <analytics.fold.it>
 - hosts: analytics.fold.it

@@ -16,7 +16,7 @@
   when: cleanup
 
 - name: Load available workloads
-  local_action: shell ls {{ run_dir }} | grep "batch-*" | head -n 100
+  local_action: shell ls {{ run_dir }} | grep "batch-*" | head -n {{ n_batches }}
   register: workload_filenames
 
 - name: Get solutions in batches
