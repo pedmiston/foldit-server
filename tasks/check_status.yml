@@ -2,6 +2,6 @@
 - name: Try loading the run id
   include_vars: file=vars/run_id.yml
 
-- name: Ensure that a run isn't already taking place
+- name: Fail if a run has been started but not retrying
   fail: msg="run_id is set. If retrying, must pass retry=yes"
-  when: run_id is defined
+  when: run_id is defined and not retry
