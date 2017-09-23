@@ -3,7 +3,7 @@
   local_action: shell cat {{ run_dir }}/batch-*.json > {{ data_dir }}/run-{{ run_id }}.json
 
 - name: Combine all the batch errors into a single txt file for the run.
-  local_action: shell cat {{ run_dir }}/batch-*-errors.txt > {{ data_dir }}/run-{{ run_id }}-errors.txt
+  local_action: shell cat {{ run_dir }}/batch-*-errors.csv > {{ data_dir }}/errors-run-{{ run_id }}.csv
 
 - name: Delete all batch files after they've been combined.
   local_action: shell rm -r {{ run_dir }}/batch*

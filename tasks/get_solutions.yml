@@ -1,13 +1,13 @@
 ---
 - set_fact:
     results: "{{ workload }}.json"
-    errors: "{{ workload }}-errors.txt"
+    errors: "{{ workload }}-errors.csv"
 
 - name: Copy the workload to the analytics server
   copy: src={{ run_dir }}/{{ workload }} dest=~/{{ workload }}
 
 - name: Run the puzzle solutions through the parsing script
-  shell: ~/bin/foldit ~/{{ workload }} > ~/{{ results }} 2> ~/{{ errors }}
+  shell: ~/bin/foldit -t json ~/{{ workload }} > ~/{{ results }} 2> ~/{{ errors }}
 
 - name: Download the data and any errors
   fetch: src=~/{{ item }} dest={{ run_dir }}/{{ item }} flat=yes

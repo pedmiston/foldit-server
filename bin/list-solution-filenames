@@ -9,4 +9,4 @@ data_dir = unipath.Path(sys.argv[1])
 for run in data_dir.listdir('run-*.json'):
     for j in open(run, 'r'):
         d = json.loads(j)
-        sys.stdout.write(d['Filepath']+'\n')
+        sys.stdout.write(d['FILEPATH'][0]+'\n')
