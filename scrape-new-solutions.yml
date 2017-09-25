@@ -1,31 +1,10 @@
 ---
-# Initiate run by setting the run id
-- hosts: localhost
-  connection: local
-  vars_files:
-    - vars/main.yml
-  tasks:
-    - include: tasks/check_status.yml
-    - include: tasks/increment_run_id.yml
-      when: not retry
-    - include: tasks/copy_available_solutions.yml
-
-# Find available solutions on <analytics.fold.it>
-- hosts: analytics.fold.it
-  remote_user: pierce
-  vars_files:
-    - vars/main.yml
-  tasks:
-    - include_vars: file=vars/run_id.yml
-    - include: tasks/find_available_solutions.yml
-
 # Create the workload on <foldit>
 - hosts: localhost
   connection: local
   vars_files:
     - vars/main.yml
   tasks:
-    - include_vars: file=vars/run_id.yml
     - include: tasks/create_workload.yml
 
 # Iterate through the workload on <analytics.fold.it>

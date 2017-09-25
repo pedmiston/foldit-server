@@ -1,15 +1,17 @@
 ---
-- name: Create a list of solutions already downloaded
-  shell: source ~/.profile && bin/list-solution-filenames {{ data_dir }} > {{ run_dir }}/{{ completed_solutions }}
-  args:
-    executable: /bin/bash
 
 - name: Filter new solutions from available
-  shell: source ~/.profile && cd {{ run_dir }} && filter-new-solutions {{ available_solutions }} {{ completed_solutions }} > {{ remaining_solutions }}
+  shell: source ~/.profile && filter-new-solutions {{ available_dir }}/{{ item }} {{ completed_dir }}/{{ item }} > {{ remaining_dir }}/{{ item }}
   args:
     executable: /bin/bash
+  with_items:
+    - "{{ top_solutions }}"
+    - "{{ all_solutions }}"
 
 - name: Split remaining solutions into batches
-  shell: source ~/.profile && cd {{ run_dir }} && split-workload {{ remaining_solutions }} {{ batch_size }}
+  shell: source ~/.profile && cd {{ remaining_dir }} && split-workload {{ item }} {{ batch_size }}
   args:
     executable: /bin/bash
+  with_items:
+    - "{{ top_solutions }}"
+    - "{{ all_solutions }}"

@@ -1,0 +1,15 @@
+---
+# Find available solutions on <analytics.fold.it>
+- hosts: analytics.fold.it
+  remote_user: pierce
+  vars_files:
+    - vars/main.yml
+  tasks:
+    - name: Ensure destination directory for available solutions exists
+      local_action: file path={{ available_dir }} state=directory
+
+    - name: Find 'top/' solutions
+      include: tasks/find_top_solutions.yml
+
+    - name: Find 'all/' solutions
+      include: tasks/find_all_solutions.yml

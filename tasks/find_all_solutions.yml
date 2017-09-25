@@ -1,13 +1,13 @@
 ---
 - name: Find puzzles with 'all/' directory
   script: bin/find-puzzles-with-all
-  register: find_puzzles_with_all_output
+  register: puzzles_with_all_output
 
 - name: Find all solutions for each puzzle
-  include: tasks/fetch_all_solutions_for_puzzle.yml
-  with_items: "{{ find_puzzles_with_all_output.stdout_lines }}"
+  include: tasks/find_all_solutions_by_puzzle.yml
+  with_items: "{{ puzzles_with_all_output.stdout_lines }}"
   loop_control:
     loop_var: puzzle_id
 
 - name: Combine all files of solution filepaths for 'all/' puzzles
-  local_action: shell cd {{ run_dir }} && cat puzzle-*-all.txt > {{ all_solutions }} && rm puzzle-*-all.txt
+  local_action: shell cd {{ available_solutions }} && cat all-solutions-puzzle-*.txt > {{ all_solutions }} && rm all-solutions-puzzle-*.txt
