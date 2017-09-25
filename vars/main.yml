@@ -12,5 +12,5 @@ batch_size: 1000
 
 data_dir: "{{ repo.loc }}/data"
 available_dir: "{{ data_dir }}/available"
-downloaded_dir: "{{ data_dir }}/downloaded"
-new_dir: "{{ data_dir }}/new"
+completed_dir: "{{ data_dir }}/completed"
+remaining_dir: "{{ data_dir }}/remaining"
