@@ -1,0 +1,15 @@
+---
+- name: Get the latest version of the foldit program
+  local_action: shell go get -u github.com/pedmiston/foldit
+
+- name: Build the foldit program
+  local_action: shell go build -o bin/foldit github.com/pedmiston/foldit
+
+- name: Ensure '~/bin' exists on the analytics server
+  file: path=~/bin state=directory
+
+- name: Move the foldit program to the analytics server
+  copy: src=bin/foldit dest=~/bin/foldit mode=u+x
+
+- name: Remove the local copy of the foldit program
+  local_action: file path=bin/foldit state=absent

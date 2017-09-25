@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 import sys
 import json
-import unipath
+from os import path
 
-assert len(sys.argv) == 2, 'must provide data dir'
-data_dir = unipath.Path(sys.argv[1])
+assert len(sys.argv) == 2, "must provide json file"
+assert path.exists(sys.argv[1]), "json file doesn't exist"
 
-for run in data_dir.listdir('run-*.json'):
-    for j in open(run, 'r'):
+for j in open(run, 'r'):
+    try:
         d = json.loads(j)
-        sys.stdout.write(d['FILEPATH'][0]+'\n')
+        f = d['FILEPATH'][0]
+    except Exception as e:
+        sys.stderr.write("error extracting FILEPATH: "+e)
+    else:
+        sys.stdout.write(f+'\n')

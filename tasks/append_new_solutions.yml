@@ -1,0 +1,10 @@
+---
+- shell: list-solution-filenames {{ workload }} >> {{ completed_dir }}/{{ top_solutions }}
+  when: 'top' in workload
+  args:
+    executable: /bin/bash
+
+- shell: list-solution-filenames {{ workload }} >> {{ completed_dir }}/{{ all_solutions }}
+  when: 'all' in workload
+  args:
+    executable: /bin/bash
