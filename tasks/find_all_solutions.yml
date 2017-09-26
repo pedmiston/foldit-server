@@ -10,4 +10,4 @@
     loop_var: puzzle_id
 
 - name: Combine all files of solution filepaths for 'all/' puzzles
-  local_action: shell cd {{ available_solutions }} && cat all-solutions-puzzle-*.txt > {{ all_solutions }} && rm all-solutions-puzzle-*.txt
+  local_action: shell cd {{ available_dir }} && cat all-solutions-puzzle-*.txt > {{ all_solutions }} && rm all-solutions-puzzle-*.txt

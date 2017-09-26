@@ -16,8 +16,31 @@
         repo: "{{ repo.url }}"
         dest: "{{ repo.loc }}"
 
-    - include: tasks/install_mysql.yml
+    - name: Template out .profile on foldit server
+      template: src=templates/profile.j2 dest=/home/pierce/.profile
+      vars:
+        repo_loc: "{{ repo.loc }}"
+
+    # - include: tasks/install_mysql.yml
     - include: tasks/install_foldit_extractor.yml
 
     # TODO: setup py venv
-    # TODO: template .profile
+
+- hosts: localhost
+  connection: local
+  vars_files:
+    - vars/main.yml
+    - vars/secrets.yml
+  tasks:
+    - name: Record name of local user
+      command: whoami
+      register: local_user
+
+    - name: Record current working directory
+      command: pwd
+      register: local_repo
+
+    - name: Template out identical .profile on localhost
+      local_action: template src=templates/profile.j2 dest=./.profile
+      vars:
+        repo_loc: "{{ local_repo.stdout }}"
