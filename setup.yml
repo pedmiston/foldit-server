@@ -1,28 +1,28 @@
 ---
-# - hosts: foldit
-#   become: yes
-#   vars_files:
-#       - vars/main.yml
-#       - vars/secrets.yml
-#   tasks:
-#     - name: Ensure aptitude is installed
-#       apt: name=aptitude state=present
-#
-#     - name: Upgrade everything
-#       apt: upgrade=yes update_cache=yes
-#
-#     - name: Clone/update foldit-server repo
-#       git:
-#         repo: "{{ repo.url }}"
-#         dest: "{{ repo.loc }}"
-#
-#     - include: tasks/install_mysql.yml
-#     - include: tasks/install_foldit_extractor.yml
-#
-#     - name: Template out .profile on server
-#       template: src=templates/profile.j2 dest=~/.profile
-#       vars:
-#         repo_loc: "{{ repo.loc }}"
+- hosts: foldit
+  become: yes
+  vars_files:
+      - vars/main.yml
+      - vars/secrets.yml
+  tasks:
+    - name: Ensure aptitude is installed
+      apt: name=aptitude state=present
+
+    - name: Upgrade everything
+      apt: upgrade=yes update_cache=yes
+
+    - name: Clone/update foldit-server repo
+      git:
+        repo: "{{ repo.url }}"
+        dest: "{{ repo.loc }}"
+
+    - name: Template out .profile on foldit server
+      template: src=templates/profile.j2 dest=/home/pierce/.profile
+      vars:
+        repo_loc: "{{ repo.loc }}"
+
+    # - include: tasks/install_mysql.yml
+    - include: tasks/install_foldit_extractor.yml
 
     # TODO: setup py venv
 
