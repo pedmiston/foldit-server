@@ -4,7 +4,10 @@ digraph {
 
   localhost -> foldit -> analytics_fold_it;
   analytics_fold_it -> foldit;
-  { rank=same; foldit, mysql; }
+
+  { rank=same; s3, foldit, mysql; }
+  s3 -> foldit[dir=back minlen=2];
+  s3 -> foldit;
   foldit -> mysql[minlen=2];
   mysql -> localhost[constraint=false];
 
