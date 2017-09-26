@@ -11,6 +11,7 @@
         - "{{ available_dir }}"
         - "{{ completed_dir }}"
         - "{{ remaining_dir }}"
+        - "{{ workload_dir }}"
 
     - name: Touch files in case this is a first run
       file: path={{ item[0] }}/{{ item[1] }} state=touch
