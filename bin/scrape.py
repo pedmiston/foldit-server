@@ -1,12 +1,16 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 import sys
 import subprocess
 import time
 from pathlib import Path
 
 usage = 'scrape [workload_dir] [workloads_per_push]'
+
+# Ansible playbook commands
+find = 'ansible-playbook find.yml'
 scrape = 'ansible-playbook scrape.yml -e workload={}'
 push = 'ansible-playbook push.yml'
+
 error = 'error in playbook: {cmd}\n{stdout}\n'
 
 def parse_args():
@@ -19,19 +23,19 @@ def parse_args():
       raise AssertionError('invalid batches_per_push: {}\n{}'.format(e, usage))
     return workload_dir, batches_per_push
 
-def run_playbook(playbook):
+def run(cmd):
     try:
-        subprocess.check_output(playbook, shell=True, stderr=subprocess.STDOUT)
+        subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as err:
-        sys.stderr.write(error.format(cmd=err.cmd, stdout=err.output))
+        sys.stderr.write(error.format(cmd=err.cmd, stdout=str(err.output)))
 
 if __name__ == '__main__':
-    run_playbook('ansible-playbook find.yml')
+    run(find)
     workload_dir, batches_per_push = parse_args()
     for i, workload in enumerate(workload_dir.iterdir()):
         print('{}: {}'.format(i, workload))
-        run_playbook(scrape.format(workload.name))
+        run(scrape.format(workload.name))
         if i%batches_per_push == batches_per_push-1:
             print('pushing...')
-            run_playbook(push)
+            run(push)
         time.sleep(60)
