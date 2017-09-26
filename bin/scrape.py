@@ -38,3 +38,5 @@ if __name__ == '__main__':
         if i%batches_per_push == batches_per_push-1:
             print('pushing...')
             run(push)
+
+    subprocess.call('rm data/available/*.txt data/remaining/*.txt')
