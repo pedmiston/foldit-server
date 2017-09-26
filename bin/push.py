@@ -6,6 +6,8 @@ from pathlib import Path
 import boto3
 from botocore.client import Config
 
+BUCKET = 'foldit'
+
 usage = 'push.py path/to/data.json'
 
 def parse_args():
@@ -20,7 +22,7 @@ def push_bundle(bundle):
                             endpoint_url='https://nyc3.digitaloceanspaces.com',
                             aws_access_key_id=environ['DO_ACCESS_KEY'],
                             aws_secret_access_key=environ['DO_SECRET_KEY'])
-    client.upload_file(bundle, BUCKET, bundle.name)
+    client.upload_file(str(bundle), BUCKET, bundle.name)
 
 if __name__ == '__main__':
     bundle = parse_args()

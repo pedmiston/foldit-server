@@ -1,6 +1,7 @@
 #!/usr/bin/env python 
 import sys
 import subprocess
+import time
 from pathlib import Path
 
 usage = 'scrape [workload_dir] [workloads_per_push]'
@@ -27,6 +28,9 @@ def run_playbook(playbook):
 if __name__ == '__main__':
     workload_dir, batches_per_push = parse_args()
     for i, workload in enumerate(workload_dir.iterdir()):
+        print('{}: {}'.format(i, workload))
         run_playbook(scrape.format(workload.name))
         if i%batches_per_push == batches_per_push-1:
+            print('pushing...')
             run_playbook(push)
+        time.sleep(60)

@@ -2,19 +2,20 @@
 - hosts: localhost
   connection: local
   vars:
-    bundle_id: "{{ ansible_dat_time.epoch }}.json"
+    bundle_id: "{{ ansible_date_time.epoch }}"
   vars_files:
     - vars/main.yml
   tasks:
     - name: Bundle completed workloads
-      shell: cat {{ workload_dir }}/*.json > {{ workload_dir }}/{{ bundle }}
+      shell: cat {{ workload_dir }}/*.json > {{ workload_dir }}/{{ bundle_id }}.json
 
     - name: Push bundle to Digital Ocean Spaces
-      shell: source ~/.profile && push.py {{ workload_dir }}/{{ bundle }}
+      shell: source ~/.profile && push.py {{ workload_dir }}/{{ bundle_id }}.json
+      args:
+        executable: /bin/bash
 
     - name: Remove all data files
       shell: rm {{ workload_dir }}/*.json
 
-    - shell: check-errors {{ workload_dir }} {{ bundle_id }}
-      args:
-        executable: /bin/bash
+    - name: Bundle errors
+      shell: cat {{ workload_dir }}/*errors.csv > {{ workload_dir }}/errors-{{ bundle_id }}.csv && rm {{ workload_dir }}/*errors.csv

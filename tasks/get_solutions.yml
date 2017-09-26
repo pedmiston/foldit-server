@@ -24,3 +24,15 @@
 
 - name: Delete workload file on foldit machine
   local_action: file path={{ workload_dir }}/{{ workload }} state=absent
+
+- name: Append new 'top/' files to completed
+  local_action: shell list-solution-filenames.py {{ workload_dir }}/{{ results }} >> {{ completed_dir }}/{{ top_solutions }}
+  when: "'top' in workload"
+  args:
+    executable: /bin/bash
+
+- name: Append new 'all/' files to completed
+  local_action: shell list-solution-filenames.py {{ workload_dir }}/{{ results }} >> {{ completed_dir }}/{{ all_solutions }}
+  when: "'all' in workload"
+  args:
+    executable: /bin/bash
