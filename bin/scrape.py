@@ -38,4 +38,3 @@ if __name__ == '__main__':
         if i%batches_per_push == batches_per_push-1:
             print('pushing...')
             run(push)
-        time.sleep(60)
