@@ -3,4 +3,6 @@
     name: go
 
 - name: Go get foldit extractor
-  shell: go get github.com/pedmiston/foldit
+  shell: source /home/pierce/.profile && go get github.com/pedmiston/foldit
+  args:
+    executable: /bin/bash
