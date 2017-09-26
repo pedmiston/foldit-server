@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 WORKLOAD=$1
 BATCH_SIZE=$2
+DST_DIR=$3
 split -l ${BATCH_SIZE} ${WORKLOAD} ${WORKLOAD%.*}-
+mv ${WORKLOAD%.*}-* ${DST_DIR}/

@@ -9,7 +9,7 @@
     - "{{ all_solutions }}"
 
 - name: Split remaining solutions into batches
-  shell: source ~/.profile && cd {{ remaining_dir }} && split-workload {{ item }} {{ batch_size }}
+  shell: source ~/.profile && cd {{ remaining_dir }} && split-workload {{ item }} {{ batch_size }} {{ workload_dir }}
   args:
     executable: /bin/bash
   with_items:
