@@ -22,19 +22,26 @@ def run(cmd):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('-w', '--workload', default='data/workload')
+    parser.add_argument('-w', '--workload-dir', default='data/workload')
     parser.add_argument('-s', '--batches-per-push', type=int, default=100)
     parser.add_argument('--skip-find', action='store_true')
     args = parser.parse_args()
 
-    if args.skip_find:
+    if not args.skip_find:
+        print('running find.yml playbook', flush=True)
         run(find)
+    else:
+        print('skipping find.yml playbook', flush=True)
 
-    for i, workload in enumerate(args.workload_dir.iterdir()):
-        print('{}: {}'.format(i, workload))
+    workload_dir = Path(args.workload_dir)
+    for i, workload in enumerate(workload_dir.iterdir()):
+        if workload.suffix != '':
+            print('skipping {}'.format(workload), flush=True)
+            continue
+        print('{}: {}'.format(i, workload), flush=True)
         run(scrape.format(workload.name))
         if i%args.batches_per_push == args.batches_per_push-1:
-            print('pushing...')
+            print('pushing...', flush=True)
             run(push)
 
     subprocess.call('rm data/available/*.txt data/remaining/*.txt')

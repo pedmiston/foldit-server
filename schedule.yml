@@ -10,6 +10,6 @@
         name: "scrape foldit solutions"
         minute: "0"
         hour: "0"
-        job: "source ~/.profile && cd {{ repo.loc }} && scrape.py {{ workload_dir }} {{ n_batches_per_push }}
+        job: "source ~/.profile && cd {{ repo.loc }} && scrape.py"
         user: "{{ ansible_user_id }}"
         state: "{{ state }}"

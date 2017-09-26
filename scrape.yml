@@ -1,6 +1,6 @@
 ---
 # Iterate through the workload on <analytics.fold.it>
-# $ ansible-playbook scrape-solutions.yml -e workload=solution-filepaths.txt
+# $ ansible-playbook scrape.yml -e workload=solution-filepaths.txt
 - hosts: analytics.fold.it
   remote_user: pierce
   vars_files:
