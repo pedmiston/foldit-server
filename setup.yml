@@ -1,28 +1,46 @@
 ---
-- hosts: foldit
-  become: yes
+# - hosts: foldit
+#   become: yes
+#   vars_files:
+#       - vars/main.yml
+#       - vars/secrets.yml
+#   tasks:
+#     - name: Ensure aptitude is installed
+#       apt: name=aptitude state=present
+#
+#     - name: Upgrade everything
+#       apt: upgrade=yes update_cache=yes
+#
+#     - name: Clone/update foldit-server repo
+#       git:
+#         repo: "{{ repo.url }}"
+#         dest: "{{ repo.loc }}"
+#
+#     - include: tasks/install_mysql.yml
+#     - include: tasks/install_foldit_extractor.yml
+#
+#     - name: Template out .profile on server
+#       template: src=templates/profile.j2 dest=~/.profile
+#       vars:
+#         repo_loc: "{{ repo.loc }}"
+
+    # TODO: setup py venv
+
+- hosts: localhost
+  connection: local
   vars_files:
-      - vars/main.yml
-      - vars/secrets.yml
+    - vars/main.yml
+    - vars/secrets.yml
   tasks:
-    - name: Ensure aptitude is installed
-      apt: name=aptitude state=present
+    - name: Record name of local user
+      command: whoami
+      register: local_user
 
-    - name: Upgrade everything
-      apt: upgrade=yes update_cache=yes
-
-    - name: Clone/update foldit-server repo
-      git:
-        repo: "{{ repo.url }}"
-        dest: "{{ repo.loc }}"
-
-    - include: tasks/install_mysql.yml
-    - include: tasks/install_foldit_extractor.yml
-
-    - name: Template out .profile on server
-      template: src=templates/profile.j2 dest=~/.profile
+    - name: Record current working directory
+      command: pwd
+      register: local_repo
 
     - name: Template out identical .profile on localhost
       local_action: template src=templates/profile.j2 dest=./.profile
-
-    # TODO: setup py venv
+      vars:
+        repo_loc: "{{ local_repo.stdout }}"
