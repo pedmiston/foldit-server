@@ -1,0 +1,21 @@
+---
+- name: Ensure aptitude is installed
+  apt: name=aptitude state=present
+
+- name: Upgrade everything
+  apt: upgrade=yes update_cache=yes
+
+- name: Clone/update foldit-server repo
+  git:
+    repo: "{{ repo.url }}"
+    dest: "{{ repo.loc }}"
+
+- name: Create .profile on foldit server via template
+  template: src=templates/profile.j2 dest=/home/pierce/.profile
+  vars:
+    repo_loc: "{{ repo.loc }}"
+
+# - include: tasks/install_mysql.yml
+- include: tasks/install_foldit_extractor.yml
+
+# TODO: setup py venv

@@ -1,0 +1,9 @@
+---
+- name: Record current working directory
+  command: pwd
+  register: local_repo
+
+- name: Template out identical .profile on localhost
+  template: src=templates/profile.j2 dest={{ local_repo.stdout }}/.profile
+  vars:
+    repo_loc: "{{ local_repo.stdout }}"
