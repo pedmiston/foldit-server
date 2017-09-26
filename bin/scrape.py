@@ -26,6 +26,7 @@ def run_playbook(playbook):
         sys.stderr.write(error.format(cmd=err.cmd, stdout=err.output))
 
 if __name__ == '__main__':
+    run_playbook('ansible-playbook find.yml')
     workload_dir, batches_per_push = parse_args()
     for i, workload in enumerate(workload_dir.iterdir()):
         print('{}: {}'.format(i, workload))
