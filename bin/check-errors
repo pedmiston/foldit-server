@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+WORKLOAD_DIR=$1
+BUNDLE_ID=$2
+BUNDLE_ERRORS=${WORKLOAD_DIR}/errors-${BUNDLE_ID}.csv
+cat ${WORKLOAD_DIR}/*errors.csv > ${BUNDLE_ERRORS}
+rm ${WORKLOAD_DIR}/*errors.csv
+N_ERRORS=$(wc -l <${BUNDLE_ERRORS})
+if N_ERRORS == 0; then
+  rm ${BUNDLE_ERRORS}

@@ -1,0 +1,20 @@
+---
+- hosts: localhost
+  connection: local
+  vars:
+    bundle_id: "{{ ansible_dat_time.epoch }}.json"
+  vars_files:
+    - vars/main.yml
+  tasks:
+    - name: Bundle completed workloads
+      shell: cat {{ workload_dir }}/*.json > {{ workload_dir }}/{{ bundle }}
+
+    - name: Push bundle to Digital Ocean Spaces
+      shell: source ~/.profile && push.py {{ workload_dir }}/{{ bundle }}
+
+    - name: Remove all data files
+      shell: rm {{ workload_dir }}/*.json
+
+    - shell: check-errors {{ workload_dir }} {{ bundle_id }}
+      args:
+        executable: /bin/bash
