@@ -19,5 +19,10 @@
     - include: tasks/install_mysql.yml
     - include: tasks/install_foldit_extractor.yml
 
+    - name: Template out .profile on server
+      template: src=templates/profile.j2 dest=~/.profile
+
+    - name: Template out identical .profile on localhost
+      local_action: template src=templates/profile.j2 dest=./.profile
+
     # TODO: setup py venv
-    # TODO: template .profile
