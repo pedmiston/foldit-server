@@ -13,16 +13,6 @@ push = 'ansible-playbook push.yml'
 
 error = 'error in playbook: {cmd}\n{stdout}\n'
 
-def parse_args():
-    assert len(sys.argv) == 3, 'incorrect number of arguments\n' + usage
-    workload_dir = Path(sys.argv[1])
-    assert workload_dir.is_dir(), 'workload dir does not exist\n' + usage
-    try:
-      batches_per_push = int(sys.argv[2])
-    except Exception as e:
-      raise AssertionError('invalid batches_per_push: {}\n{}'.format(e, usage))
-    return workload_dir, batches_per_push
-
 def run(cmd):
     try:
         subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
@@ -30,12 +20,20 @@ def run(cmd):
         sys.stderr.write(error.format(cmd=err.cmd, stdout=str(err.output)))
 
 if __name__ == '__main__':
-    run(find)
-    workload_dir, batches_per_push = parse_args()
-    for i, workload in enumerate(workload_dir.iterdir()):
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-w', '--workload', default='data/workload')
+    parser.add_argument('-s', '--batches-per-push', type=int, default=100)
+    parser.add_argument('--skip-find', action='store_true')
+    args = parser.parse_args()
+
+    if args.skip_find:
+        run(find)
+
+    for i, workload in enumerate(args.workload_dir.iterdir()):
         print('{}: {}'.format(i, workload))
         run(scrape.format(workload.name))
-        if i%batches_per_push == batches_per_push-1:
+        if i%args.batches_per_push == args.batches_per_push-1:
             print('pushing...')
             run(push)
 
