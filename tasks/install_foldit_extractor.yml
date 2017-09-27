@@ -1,8 +1,0 @@
----
-- include_role:
-    name: go
-
-- name: Go get foldit extractor
-  shell: source /home/pierce/.profile && go get github.com/pedmiston/foldit
-  args:
-    executable: /bin/bash

@@ -1,15 +1,13 @@
 #!/usr/bin/env python
-"""scrape.py scrapes batches of new solution pdb files and
-periodically bundles them up and sends them to cloud storage.
-"""
+"""scrape.py scrapes solution files and stores them in the cloud."""
 import sys
 import subprocess
 import time
 from pathlib import Path
 
-
 # Ansible playbook commands
 find = 'ansible-playbook find.yml'
+install = 'ansible-playbook install.yml'
 scrape = 'ansible-playbook scrape.yml -e workload={}'
 push = 'ansible-playbook push.yml'
 
@@ -27,21 +25,27 @@ if __name__ == '__main__':
     parser.add_argument('-w', '--workload-dir', default='data/workload')
     parser.add_argument('-s', '--batches-per-push', type=int, default=100)
     parser.add_argument('--skip-find', action='store_true')
+    parser.add_argument('--dont-update-scraper', action='store_true')
     args = parser.parse_args()
 
+    # Find available solutions unless told not to
     if not args.skip_find:
-        print('running find.yml playbook', flush=True)
+        print('running find.yml playbook...', flush=True)
         run(find)
-    else:
-        print('skipping find.yml playbook', flush=True)
+
+    # Install/update scraper unless told not to
+    if not args.dont_update_scraper:
+        run(install)
 
     workload_dir = Path(args.workload_dir)
     for i, workload in enumerate(workload_dir.iterdir()):
+        # Skip any file in the workload dir that has a file extension
         if workload.suffix != '':
-            print('skipping {}'.format(workload), flush=True)
             continue
+
         print('{}: {}'.format(i, workload), flush=True)
         run(scrape.format(workload.name))
+
         if i%args.batches_per_push == args.batches_per_push-1:
             print('pushing...', flush=True)
             run(push)

@@ -1,6 +1,12 @@
 ---
+# Configure the foldit server and mirror the same environment locally.
+# Usage:
+#   ansible-playbook setup.yml
+#   ansible-playbook setup.yml -e host=foldit      # run setup on foldit only
+#   ansible-playbook setup.yml -e host=localhost   # run setup on localhost only
 - hosts: foldit
   become: yes
+  become_user: pierce
   vars_files:
       - vars/main.yml
       - vars/secrets.yml

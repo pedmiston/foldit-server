@@ -1,13 +1,48 @@
 ---
 # Iterate through the workload on <analytics.fold.it>
-# $ ansible-playbook scrape.yml -e workload=solution-filepaths.txt
-- hosts: analytics.fold.it
+# Usage:
+#   ansible-playbook scrape.yml -e workload=solution-filepaths.txt
+- name: Scrape data from a workload of solution files
+  hosts: analytics.fold.it
   remote_user: pierce
   vars_files:
     - vars/main.yml
-  vars:
-    install_scraper: no
   tasks:
-    - include: tasks/install_scraper.yml
-      when: install_scraper
-    - include: tasks/get_solutions.yml
+    - name: Create vars to hold file names for results and errors
+      set_fact:
+        results: "{{ workload }}.json"
+        errors: "{{ workload }}-errors.csv"
+
+    - name: Copy the workload to the analytics server
+      copy: src={{ workload_dir }}/{{ workload }} dest=~/{{ workload }}
+
+    - name: Run the puzzle solutions through the parsing script
+      shell: ~/bin/foldit ~/{{ workload }} > ~/{{ results }} 2> ~/{{ errors }}
+
+    - name: Download the data and any errors
+      fetch: src=~/{{ item }} dest={{ workload_dir }}/{{ item }} flat=yes
+      with_items:
+        - "{{ results }}"
+        - "{{ errors }}"
+
+    - name: Delete leftover files on analytics server
+      file: path={{ item }} state=absent
+      with_items:
+        - "~/{{ workload }}"
+        - "~/{{ results }}"
+        - "~/{{ errors }}"
+
+    - name: Delete workload file on foldit machine
+      local_action: file path={{ workload_dir }}/{{ workload }} state=absent
+
+    - name: Append new 'top/' files to completed
+      local_action: shell list-solution-filenames.py {{ workload_dir }}/{{ results }} >> {{ completed_dir }}/{{ top_solutions }}
+      when: "'top' in workload"
+      args:
+        executable: /bin/bash
+
+    - name: Append new 'all/' files to completed
+      local_action: shell list-solution-filenames.py {{ workload_dir }}/{{ results }} >> {{ completed_dir }}/{{ all_solutions }}
+      when: "'all' in workload"
+      args:
+        executable: /bin/bash

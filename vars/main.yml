@@ -1,7 +1,7 @@
 ---
 repo:
   url: "https://github.com/pedmiston/foldit-server.git"
-  loc: "~/foldit-server"
+  loc: "~/foldit"
 
 mysql_db_name: Foldit
 
