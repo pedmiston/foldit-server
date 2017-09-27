@@ -1,8 +1,5 @@
 ---
-- name: Clone/update foldit-server repo
-  git:
-    repo: "{{ repo.url }}"
-    dest: "{{ repo.loc }}"
+- include: tasks/setup_foldit_repo.yml
 
 - name: Create .profile on foldit server via template
   template: src=templates/profile.j2 dest=~/.profile

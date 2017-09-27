@@ -1,0 +1,5 @@
+---
+- name: Clone/update foldit-server repo
+  git:
+    repo: "{{ repo.url }}"
+    dest: "{{ repo.loc }}"
