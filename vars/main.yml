@@ -10,8 +10,8 @@ scraper: ~/bin/scraper
 top_solutions: top-solutions.txt
 all_solutions: all-solutions.txt
 
-batch_size: 1000
-n_batches_per_push: 100
+batch_size: 5000
+n_batches_per_push: 50
 
 data_dir: "{{ repo.loc }}/data"
 available_dir: "{{ data_dir }}/available"
