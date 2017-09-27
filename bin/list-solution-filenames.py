@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# list-solution-filenames.py lists the solution filenames within a json file.
+# Usage: list-solution-filenames [JSON_DATA_FILE]
 import sys
 import json
 from os import path

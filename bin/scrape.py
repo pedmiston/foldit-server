@@ -1,10 +1,12 @@
 #!/usr/bin/env python
+"""scrape.py scrapes batches of new solution pdb files and
+periodically bundles them up and sends them to cloud storage.
+"""
 import sys
 import subprocess
 import time
 from pathlib import Path
 
-usage = 'scrape [workload_dir] [workloads_per_push]'
 
 # Ansible playbook commands
 find = 'ansible-playbook find.yml'

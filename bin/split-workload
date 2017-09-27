@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# split-workload splits a big file into batches and
+# moves them to the destination directory.
+# Usage: split-workload [WORKLOAD] [BATCH_SIZE] [DST_DIR]
 WORKLOAD=$1
 BATCH_SIZE=$2
 DST_DIR=$3

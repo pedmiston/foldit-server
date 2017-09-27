@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
+# find-all-solutions finds solution pdb files from puzzles with an 'all/' dir.
+# Usage: find-all-solutions [PUZZLE_ID] > all-solutions-puzzle-[PUZZLE_ID].txt
 PUZZLE_ID=$1
 find ~/fetch/solution_${PUZZLE_ID}/all/ -type f -name "*.pdb"

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# filter-new-solutions takes the set difference of AVAILABLE - COMPLETED
+# Usage: filter-new-solutions [AVAILABLE] [COMPLETED] > [REMAINING]
 AVAILABLE=$1
 COMPLETED=$2
 comm -23 <(sort ${AVAILABLE}) <(sort ${COMPLETED})
