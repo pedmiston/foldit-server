@@ -15,8 +15,7 @@ def run(name, arg_string=''):
     except subprocess.CalledProcessError as err:
         # convert bytes to string so that new lines are printed
         output_str = str(err.output)
-        sys.stderr.write(errorf.format(cmd=err.cmd, stdout=output_str),
-                         flush=True)
+        sys.stderr.write(errorf.format(cmd=err.cmd, stdout=output_str))
 
 if __name__ == '__main__':
     import argparse
@@ -53,6 +52,6 @@ if __name__ == '__main__':
 
         if i%args.batches_per_push == args.batches_per_push-1:
             print('running playbook: push', flush=True)
-            run(push)
+            run('push')
 
     subprocess.call('rm data/available/*.txt')
