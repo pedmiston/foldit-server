@@ -46,7 +46,7 @@ if __name__ == '__main__':
         if workload.suffix != '':
             continue
 
-        print('running playbook: scrape workload#{}={}'.format(i, workload),
+        print('running playbook: scrape workload #{} {}'.format(i, workload.name),
               flush=True)
         run('scrape', arg_string='-e workload={}'.format(workload.name))
 
