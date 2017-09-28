@@ -3,16 +3,22 @@
 # Usage: list-solution-filenames [JSON_DATA_FILE]
 import sys
 import json
-from os import path
+from pathlib import Path
 
-assert len(sys.argv) == 2, "must provide json file"
-assert path.exists(sys.argv[1]), "json file doesn't exist"
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('json')
+    args = parser.parse_args()
+    filename = Path(args.json)
+    assert filename.exists(), "json file doesn't exist"
 
-for j in open(sys.argv[1], 'r'):
-    try:
-        d = json.loads(j)
-        f = d['FILEPATH'][0]
-    except Exception as e:
-        sys.stderr.write("error extracting FILEPATH: "+e)
-    else:
-        sys.stdout.write(f+'\n')
+    with filename.open() as f:
+      for j in f:
+          try:
+              d = json.loads(j)
+              s = d['FILEPATH']
+          except Exception as e:
+              sys.stderr.write("error extracting FILEPATH: "+e)
+          else:
+              sys.stdout.write(s+'\n')
