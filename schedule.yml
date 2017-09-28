@@ -14,7 +14,7 @@
       cron:
         name: "scrape foldit solutions"
         minute: "0"
-        hour: "0"
+        hour: "22"
         job: "source ~/.profile && cd {{ repo.loc }} && scrape.py"
         user: "{{ ansible_user_id }}"
         state: "{{ state }}"
