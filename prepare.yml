@@ -1,0 +1,21 @@
+---
+# Prepare <foldit> for new scrape
+- hosts: localhost
+  connection: local
+  vars_files:
+    - vars/main.yml
+  tasks:
+    - name: Ensure destination directories exist
+      file: path={{ item }} state=directory
+      with_items:
+        - "{{ available_dir }}"
+        - "{{ completed_dir }}"
+        - "{{ remaining_dir }}"
+        - "{{ workload_dir }}"
+
+    - name: Touch files in case this is a first run
+      file: path={{ item[0] }}/{{ item[1] }} state=touch
+      with_nested:
+        - [ "{{ available_dir }}", "{{ completed_dir }}", "{{ remaining_dir }}"]
+        - [ "{{ top_solutions }}", "{{ all_solutions }}" ]
+

@@ -1,24 +1,4 @@
 ---
-# Prepare <foldit> for new scrape
-- hosts: localhost
-  connection: local
-  vars_files:
-    - vars/main.yml
-  tasks:
-    - name: Ensure destination directories exist
-      file: path={{ item }} state=directory
-      with_items:
-        - "{{ available_dir }}"
-        - "{{ completed_dir }}"
-        - "{{ remaining_dir }}"
-        - "{{ workload_dir }}"
-
-    - name: Touch files in case this is a first run
-      file: path={{ item[0] }}/{{ item[1] }} state=touch
-      with_nested:
-        - [ "{{ available_dir }}", "{{ completed_dir }}", "{{ remaining_dir }}"]
-        - [ "{{ top_solutions }}", "{{ all_solutions }}" ]
-
 # Find available solutions on <analytics.fold.it>
 - hosts: analytics.fold.it
   remote_user: pierce
@@ -27,13 +7,8 @@
   tasks:
     - name: Find 'top/' solutions
       include: tasks/find_top_solutions.yml
+      when: 'type is not defined or type == "top"'
+
     - name: Find 'all/' solutions
       include: tasks/find_all_solutions.yml
-
-# Create the workload on <foldit>
-- hosts: localhost
-  connection: local
-  vars_files:
-    - vars/main.yml
-  tasks:
-    - include: tasks/create_workload.yml
+      when: 'type is not defined or type == "all"'

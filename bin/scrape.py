@@ -5,19 +5,18 @@ import subprocess
 import time
 from pathlib import Path
 
-# Ansible playbook commands
-find = 'ansible-playbook find.yml'
-install = 'ansible-playbook install.yml'
-scrape = 'ansible-playbook scrape.yml -e workload={}'
-push = 'ansible-playbook push.yml'
+cmdf = 'ansible-playbook {name}.yml {arg_string}'
+errorf = 'error in playbook: {cmd}\n{stdout}\n'
 
-error = 'error in playbook: {cmd}\n{stdout}\n'
-
-def run(cmd):
+def run(name, arg_string=''):
+    cmd = cmdf.format(name=name, arg_string=arg_string)
     try:
-        subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+        subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as err:
-        sys.stderr.write(error.format(cmd=err.cmd, stdout=str(err.output)))
+        # convert bytes to string so that new lines are printed
+        output_str = str(err.output)
+        sys.stderr.write(errorf.format(cmd=err.cmd, stdout=output_str),
+                         flush=True)
 
 if __name__ == '__main__':
     import argparse
@@ -28,14 +27,19 @@ if __name__ == '__main__':
     parser.add_argument('--dont-update-scraper', action='store_true')
     args = parser.parse_args()
 
+    print('running playbook: prepare', flush=True)
+    run('prepare')
+
     # Find available solutions unless told not to
     if not args.skip_find:
-        print('running find.yml playbook...', flush=True)
-        run(find)
+        print('running playbook: find', flush=True)
+        run('find')
+        run('workload')
 
     # Install/update scraper unless told not to
     if not args.dont_update_scraper:
-        run(install)
+        print('running playbook: install', flush=True)
+        run('install')
 
     workload_dir = Path(args.workload_dir)
     for i, workload in enumerate(workload_dir.iterdir()):
@@ -43,11 +47,12 @@ if __name__ == '__main__':
         if workload.suffix != '':
             continue
 
-        print('{}: {}'.format(i, workload), flush=True)
-        run(scrape.format(workload.name))
+        print('running playbook: scrape workload#{}={}'.format(i, workload),
+              flush=True)
+        run('scrape', arg_string='-e workload={}'.format(workload.name))
 
         if i%args.batches_per_push == args.batches_per_push-1:
-            print('pushing...', flush=True)
+            print('running playbook: push', flush=True)
             run(push)
 
-    subprocess.call('rm data/available/*.txt data/remaining/*.txt')
+    subprocess.call('rm data/available/*.txt')

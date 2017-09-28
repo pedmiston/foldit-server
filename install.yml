@@ -9,13 +9,13 @@
       local_action: shell go get -u github.com/pedmiston/foldit-scraper
 
     - name: Build the foldit program
-      local_action: shell go build -o bin/scraper github.com/pedmiston/foldit-scraper
+      local_action: shell go build -o {{ scraper }} github.com/pedmiston/foldit-scraper
 
     - name: Ensure '~/bin' exists on the analytics server
       file: path=~/bin state=directory
 
     - name: Move the foldit program to the analytics server
-      copy: src=bin/foldit dest={{ scraper }} mode=u+x
+      copy: src={{ scraper }} dest=~/{{ scraper }} mode=u+x
 
     - name: Remove the local copy of the foldit program
-      local_action: file path=bin/foldit state=absent
+      local_action: file path={{ scraper }} state=absent
