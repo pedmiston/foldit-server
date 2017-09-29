@@ -54,4 +54,8 @@ if __name__ == '__main__':
             print('running playbook: push', flush=True)
             run('push')
 
-    subprocess.call('rm data/available/*.txt')
+    print('running playbook: push', flush=True)
+    run('push')
+
+    print('cleaning up')
+    subprocess.call('rm data/available/*.txt'.split())
