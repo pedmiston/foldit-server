@@ -54,4 +54,5 @@ if __name__ == '__main__':
             print('running playbook: push', flush=True)
             run('push')
 
+    run('push')
     subprocess.call('rm data/available/*.txt')
