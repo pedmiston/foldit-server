@@ -1,0 +1,14 @@
+---
+- hosts: localhost
+  connection: local
+  vars_files:
+    - vars/main.yml
+  tasks:
+    - name: Clear available and remaining solutions
+      file: path={{ item[0] }}/{{ item[1] }} state=absent
+      with_nested:
+        - [ "{{ available_dir }}", "{{ remaining_dir }}" ]
+        - [ "{{ top_solutions }}", "{{ all_solutions }}" ]
+
+    - name: Remove empty errors files from workload dir
+      shell: find {{ workload_dir }} -size 0 -print0 | xargs -0 rm
