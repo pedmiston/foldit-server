@@ -1,12 +1,8 @@
-import yaml
+from os import environ
 from minio import Minio
 from minio.error import ResponseError
 
-auth = yaml.load(open('secrets.yml'))
-client = Minio('s3.amazonaws.com',
-               access_key=auth['do_access_key'],
-               secret_key=auth['do_secret_key'],
+client = Minio('nyc3.digitaloceanspaces.com',
+               access_key=environ['DO_ACCESS_KEY'],
+               secret_key=environ['DO_SECRET_KEY'],
                secure=True)
-
-for bucket in client.list_buckets():
-    print(bucket.name, bucket.creation_date)
