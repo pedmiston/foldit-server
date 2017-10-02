@@ -43,9 +43,7 @@ if __name__ == '__main__':
         # Skip files that have a file extension
         if workload.suffix != '':
             continue
-
         run('scrape', arg_string='-e workload={}'.format(workload.name))
-
         if i%args.batches_per_push == args.batches_per_push-1:
             run('push')
 
