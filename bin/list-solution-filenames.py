@@ -39,11 +39,12 @@ def list_solutions_in_bucket(bucket):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('json')
-    parser.add_argument('-b', '--bucket', help='Bucket name',
+    parser.add_argument('name')
+    parser.add_argument('-b', '--bucket',
+                        help='interpret [name] as the name of a bucket',
                         action='store_true')
     args = parser.parse_args()
     if args.bucket:
-        list_solutions_in_bucket(args.json)
+        list_solutions_in_bucket(args.name)
     else:
-        list_solutions_in_file(args.json)
+        list_solutions_in_file(args.name)
