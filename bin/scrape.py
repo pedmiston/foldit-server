@@ -15,10 +15,11 @@ def run(name, arg_string='', ignore_errors=False):
     try:
         subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as err:
-        # convert bytes to string so that new lines are printed
-        output_str = err.output.decode('utf-8')
-        sys.stderr.write(errorf.format(cmd=err.cmd, stdout=output_str))
-        if not ignore_errors:
+        if ignore_errors:
+            # convert bytes to string so that new lines are printed
+            output_str = err.output.decode('utf-8')
+            sys.stderr.write(errorf.format(cmd=err.cmd, stdout=output_str))
+        else:
             raise err
 
 if __name__ == '__main__':
