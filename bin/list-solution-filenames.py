@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # list-solution-filenames.py lists the solution filenames within a json file.
 # Usage: list-solution-filenames [JSON_DATA_FILE]
+import os
 import sys
 import json
 from os import environ
@@ -35,6 +36,7 @@ def list_solutions_in_bucket(bucket):
         client.download_file('foldit', key, key)
         sys.stderr.write('Listing solutions in {}'.format(key))
         list_solutions_in_file(key)
+        os.remove(key)
 
 if __name__ == '__main__':
     import argparse

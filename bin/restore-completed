@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+list-solution-filenames.py -b foldit | awk '{print >out}; /top/{out="top-solutions.txt"}' out=all-solutions.txt
