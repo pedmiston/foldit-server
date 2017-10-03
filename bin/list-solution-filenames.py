@@ -32,9 +32,7 @@ def list_solutions_in_bucket(bucket):
     resp = client.list_objects_v2(Bucket='foldit')
     keys = [obj['Key'] for obj in resp['Contents']]
     for key in keys:
-        sys.stderr.write('Downloading {}'.format(key))
         client.download_file('foldit', key, key)
-        sys.stderr.write('Listing solutions in {}'.format(key))
         list_solutions_in_file(key)
         os.remove(key)
 
