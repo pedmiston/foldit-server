@@ -8,8 +8,9 @@ from pathlib import Path
 cmdf = 'ansible-playbook {name}.yml {arg_string}'
 errorf = 'error in playbook: {cmd}\n{stdout}\n'
 
-def run(name, arg_string=''):
-    print('running playbook: {} {}'.format(name, arg_string), flush=True)
+def run(name, arg_string='', ignore_errors=False):
+    t = time.strftime('%H:%M:%S', time.localtime())
+    print('[{}] running playbook: {} {}'.format(t, name, arg_string), flush=True)
     cmd = cmdf.format(name=name, arg_string=arg_string)
     try:
         subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
@@ -17,6 +18,8 @@ def run(name, arg_string=''):
         # convert bytes to string so that new lines are printed
         output_str = err.output.decode('utf-8')
         sys.stderr.write(errorf.format(cmd=err.cmd, stdout=output_str))
+        if not ignore_errors:
+            raise err
 
 if __name__ == '__main__':
     import argparse
@@ -47,5 +50,5 @@ if __name__ == '__main__':
         if i%args.batches_per_push == args.batches_per_push-1:
             run('push')
 
-    run('push')
+    run('push', ignore_errors=True)
     run('cleanup')
