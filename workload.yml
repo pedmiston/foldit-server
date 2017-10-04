@@ -5,6 +5,10 @@
   vars_files:
     - vars/main.yml
   tasks:
+    - name: Clear workload directory of prior workloads
+      shell: find {{ workload_dir }} -type f ! -name "*.*" -exec rm {} \;
+      ignore_errors: yes
+
     - name: Filter new solutions from available
       shell: source ~/.profile && filter-new-solutions {{ available_dir }}/{{ item }} {{ completed_dir }}/{{ item }} > {{ remaining_dir }}/{{ item }}
       args:
