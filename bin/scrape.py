@@ -10,7 +10,8 @@ errorf = 'error in playbook: {cmd}\n{stdout}\n'
 
 def run(name, arg_string='', ignore_errors=False):
     t = time.strftime('%H:%M:%S', time.localtime())
-    print('[{}] running playbook: {} {}'.format(t, name, arg_string), flush=True)
+    print('[{}] running playbook: {} {}'.format(t, name, arg_string),
+          flush=True)
     cmd = cmdf.format(name=name, arg_string=arg_string)
     try:
         subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)

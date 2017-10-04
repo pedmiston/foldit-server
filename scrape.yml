@@ -13,10 +13,10 @@
         results: "{{ workload }}.json"
         errors: "{{ workload }}-errors.csv"
 
-    - name: Copy the workload to the analytics server
+    - name: Copy the workload {{ workload }} to the analytics server
       copy: src={{ workload_dir }}/{{ workload }} dest=~/{{ workload }}
 
-    - name: Run the puzzle solutions through the scraper script
+    - name: Run the workload {{ workload }} through the scraper
       shell: "~/{{ scraper }} ~/{{ workload }} > ~/{{ results }} 2> ~/{{ errors }}"
 
     - name: Download the data and any errors
@@ -32,16 +32,19 @@
         - "~/{{ results }}"
         - "~/{{ errors }}"
 
+    - name: Clear the ansible cache
+      meta: clear_facts
+
     - name: Delete workload file on foldit machine
       local_action: file path={{ workload_dir }}/{{ workload }} state=absent
 
-    - name: Append new 'top/' files to completed
+    - name: Append new 'top/' files from {{ workload }} to {{ top_solutions }}
       local_action: shell list-solution-filenames.py {{ workload_dir }}/{{ results }} >> {{ completed_dir }}/{{ top_solutions }}
       when: "'top' in workload"
       args:
         executable: /bin/bash
 
-    - name: Append new 'all/' files to completed
+    - name: Append new 'all/' files from {{ workload }} to {{ all_solutions }}
       local_action: shell list-solution-filenames.py {{ workload_dir }}/{{ results }} >> {{ completed_dir }}/{{ all_solutions }}
       when: "'all' in workload"
       args:
