@@ -6,6 +6,7 @@ repo:
 mysql_db_name: Foldit
 
 scraper: bin/scrape
+scraper_gopath: github.com/pedmiston/foldit-go/cmd/scrape
 
 top_solutions: top-solutions.txt
 all_solutions: all-solutions.txt

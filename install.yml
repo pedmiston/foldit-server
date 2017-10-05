@@ -6,10 +6,10 @@
     - vars/main.yml
   tasks:
     - name: Get the latest version of the foldit program
-      local_action: shell go get -u github.com/pedmiston/foldit-scraper
+      local_action: shell go get -u {{ scraper_gopath }}
 
     - name: Build the foldit program
-      local_action: shell go build -o {{ scraper }} github.com/pedmiston/foldit/cmd/scrape
+      local_action: shell go build -o {{ scraper }} {{ scraper_gopath }}
 
     - name: Ensure '~/bin' exists on the analytics server
       file: path=~/bin state=directory
