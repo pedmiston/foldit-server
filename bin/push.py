@@ -3,20 +3,16 @@
 import sys
 from os import environ
 from pathlib import Path
-
 import boto3
-from botocore.client import Config
-
-BUCKET = 'foldit'
 
 usage = 'push.py path/to/data.json'
+BUCKET = 'foldit'
 
 def upload_file(bundle):
     session = boto3.session.Session()
-    client = session.client('s3', region_name='nyc3',
-                            endpoint_url='https://nyc3.digitaloceanspaces.com',
-                            aws_access_key_id=environ['DO_ACCESS_KEY'],
-                            aws_secret_access_key=environ['DO_SECRET_KEY'])
+    client = session.client('s3',
+                            aws_access_key_id=environ['AWS_ACCESS_KEY'],
+                            aws_secret_access_key=environ['AWS_SECRET_KEY'])
     client.upload_file(str(bundle), BUCKET, bundle.name)
 
 if __name__ == '__main__':

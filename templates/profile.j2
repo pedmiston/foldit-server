@@ -10,6 +10,8 @@ export GOPATH=${HOME}/go
 export ANSIBLE_VAULT_PASSWORD_FILE=${HOME}/.ansible_vault_password_files/foldit.txt
 export DO_ACCESS_KEY={{ do_access_key }}
 export DO_SECRET_KEY={{ do_secret_key }}
+export AWS_ACCESS_KEY={{ aws_access_key }}
+export AWS_SECRET_KEY={{ aws_secret_key }}
 
 source $HOME/.venvs/foldit/bin/activate
 export PATH={{ repo_loc }}/bin:$PATH
