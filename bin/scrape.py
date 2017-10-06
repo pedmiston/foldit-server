@@ -5,6 +5,8 @@ import subprocess
 import time
 from pathlib import Path
 
+workload_dir = Path('data/workload')
+batches_per_push = 100
 cmdf = 'ansible-playbook {name}.yml {arg_string}'
 errorf = 'error in playbook: {cmd}\n{stdout}\n'
 
@@ -26,29 +28,21 @@ def run(name, arg_string='', ignore_errors=False):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('-w', '--workload-dir', default='data/workload')
-    parser.add_argument('-s', '--batches-per-push', type=int, default=100)
-    parser.add_argument('--skip-find', action='store_true')
-    parser.add_argument('--dont-update-scraper', action='store_true')
+    parser.add_argument('--retry', action='store_true')
     args = parser.parse_args()
 
-    # Find available solutions unless told not to
-    if not args.skip_find:
+    if not args.retry:
         run('prepare')
         run('find')
         run('workload')
-
-    # Install/update scraper unless told not to
-    if not args.dont_update_scraper:
         run('install')
 
-    workload_dir = Path(args.workload_dir)
     for i, workload in enumerate(workload_dir.iterdir()):
         # Skip files that have a file extension
         if workload.suffix != '':
             continue
         run('scrape', arg_string='-e workload={}'.format(workload.name))
-        if i%args.batches_per_push == args.batches_per_push-1:
+        if i%batches_per_push == batches_per_push-1:
             run('push')
 
     run('push', ignore_errors=True)
