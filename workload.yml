@@ -22,9 +22,12 @@
         - "{{ all_solutions }}"
     
     - name: Split remaining solutions into batches
-      command: split -l {{ batch_size }} {{ item }} {{ item | splitext | first }}-
+      command: split -l {{ batch_size }} {{ item }} batch-{{ item | splitext | first }}-
       args:
         chdir: "{{ remaining_dir }}"
       with_items:
         - "{{ top_solutions }}"
         - "{{ all_solutions }}"
+
+    - name: Move batches to workload directory
+      shell: mv {{ remaining_dir }}/batch-* {{ workload_dir }}/
