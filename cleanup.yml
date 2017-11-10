@@ -11,4 +11,4 @@
         - [ "{{ top_solutions }}", "{{ all_solutions }}" ]
 
     - name: Remove empty errors files from workload dir
-      shell: find {{ workload_dir }} -size 0 -print0 | xargs -0 rm
+      shell: find {{ workload_dir }} -size 0 -print0 -exec rm {} \;
