@@ -10,6 +10,6 @@
   include_role:
     name: go
 
-# - include: tasks/install_mysql.yml
+- include: tasks/install_mysql.yml
 
 # TODO: setup py venv
