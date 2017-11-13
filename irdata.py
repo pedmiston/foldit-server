@@ -1,4 +1,5 @@
 import json
+from db import Score
 
 class IRData:
     def __init__(self, data):
@@ -6,7 +7,7 @@ class IRData:
 
     @property
     def filename(self):
-        return self._data['FILENAME']
+        return self._data['FILEPATH']
 
     @property
     def solution_id(self):
@@ -27,6 +28,9 @@ class IRData:
 
     def solution_scores(self):
         return [self.solution_id, self.solution_score]
+
+    def to_score_obj(self):
+        return Score(id=self.solution_id, score=self.solution_score)
 
 
 class InvalidSolutionError(Exception):

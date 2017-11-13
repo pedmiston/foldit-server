@@ -1,9 +1,13 @@
 import sys
+import json
 import csv
 from os import environ
 import boto3
 import botocore
 from invoke import task
+
+from irdata import IRData, InvalidSolutionError
+from db import Score
 
 BUCKET = 'foldit'
 
@@ -32,9 +36,10 @@ def get_key(ctx, key):
 def get_solution_scores(ctx, key):
     dst = open('solution_scores.csv', 'w', newline='')
     writer = csv.writer(dst)
+    writer.writerow(['solution_id', 'solution_score'])
 
     with open(key, 'r') as f:
-        for json_str in f.read():
+        for json_str in f:
             json_data = json.loads(json_str)
             irdata = IRData(json_data)
             try:
