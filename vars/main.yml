@@ -3,8 +3,6 @@ repo:
   url: "https://github.com/pedmiston/foldit-server.git"
   loc: "~/foldit"
 
-mysql_db_name: Foldit
-
 scraper: bin/scrape
 scraper_gopath: github.com/pedmiston/foldit-go/cmd/scrape
 
@@ -19,3 +17,25 @@ available_dir: "{{ data_dir }}/available"
 completed_dir: "{{ data_dir }}/completed"
 remaining_dir: "{{ data_dir }}/remaining"
 workload_dir: "{{ data_dir }}/workload"
+
+# MySQL
+mysql_user: foldit
+mysql_test_user: foldittest
+mysql_foldit_host: 192.241.128.175
+mysql_foldit_port: 3306
+mysql_db_name: Foldit
+mysql_test_db_name: FolditTest
+
+mysql_root_password: "{{ mysql_root_password }}"
+mysql_databases:
+  - name: "{{ mysql_db_name }}"
+  - name: "{{ mysql_test_db_name }}"
+mysql_users:
+  - name: "{{ mysql_user }}"
+    host: "%"
+    password: "{{ mysql_foldit_password }}"
+    priv: "{{ mysql_db_name }}.*:ALL"
+  - name: "{{ mysql_test_user }}"
+    host: "%"
+    password: "{{ mysql_foldit_test_password }}"
+    priv: "{{ mysql_test_db_name }}.*:ALL"
