@@ -6,12 +6,21 @@
 #   ansible-playbook setup.yml -e host=localhost   # run setup on localhost only
 - hosts: foldit
   become: yes
+  vars_files:
+      - vars/main.yml
+      - vars/secrets.yml
+  tasks:
+      - include_tasks: tasks/setup_foldit_root.yml
+        when: "host is not defined or host == 'foldit'"
+
+- hosts: foldit
+  become: yes
   become_user: pierce
   vars_files:
       - vars/main.yml
       - vars/secrets.yml
   tasks:
-    - include: tasks/setup_foldit.yml
+    - include_tasks: tasks/setup_foldit_user.yml
       when: "host is not defined or host == 'foldit'"
 
 - hosts: localhost
@@ -20,5 +29,5 @@
     - vars/main.yml
     - vars/secrets.yml
   tasks:
-    - include: tasks/setup_localhost.yml
+    - include_tasks: tasks/setup_localhost.yml
       when: "host is not defined or host == 'localhost'"

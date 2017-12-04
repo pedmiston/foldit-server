@@ -21,3 +21,14 @@ https://github.com/pedmiston/foldit-data
 #
 devtools::install_github("pedmiston/foldit-data")
 ```
+
+## Getting started
+
+```bash
+python3 -m venv ~/.venvs/foldit
+source ~/.venvs/foldit/bin/activate
+pip install -r requirements.txt
+export ANSIBLE_VAULT_PASSWORD_FILE=/path/to/password_file.txt
+ansible-playbook setup.yml
+```
+

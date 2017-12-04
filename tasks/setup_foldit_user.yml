@@ -1,15 +1,7 @@
 ---
-- include: tasks/setup_foldit_repo.yml
+- include_tasks: tasks/setup_foldit_repo.yml
 
 - name: Create .profile on foldit server via template
   template: src=templates/profile.j2 dest=~/.profile
   vars:
     repo_loc: "{{ repo.loc }}"
-
-- name: Install go
-  include_role:
-    name: go
-
-# - include: tasks/install_mysql.yml
-
-# TODO: setup py venv
