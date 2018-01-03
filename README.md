@@ -18,7 +18,6 @@ To analyze the data, install the R package "pedmiston/foldit-data" from GitHub.
 https://github.com/pedmiston/foldit-data
 
 ```R
-#
 devtools::install_github("pedmiston/foldit-data")
 ```
 
@@ -28,7 +27,7 @@ devtools::install_github("pedmiston/foldit-data")
 python3 -m venv ~/.venvs/foldit
 source ~/.venvs/foldit/bin/activate
 pip install -r requirements.txt
+ansible-galaxy install -r requirements.yml
 export ANSIBLE_VAULT_PASSWORD_FILE=/path/to/password_file.txt
 ansible-playbook setup.yml
 ```
-

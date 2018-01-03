@@ -8,7 +8,8 @@
 #
 # Requirements:
 #   export ANSIBLE_VAULT_PASSWORD_FILE=/path/to/my/vault-pass.txt
-- hosts: foldit
+- name: Setup Foldit server as root
+  hosts: foldit
   become: yes
   vars_files:
       - vars/main.yml
@@ -17,7 +18,8 @@
       - include_tasks: tasks/setup_foldit_root.yml
         when: "host is not defined or host == 'foldit'"
 
-- hosts: foldit
+- name: Setup Foldit server as user
+  hosts: foldit
   become: yes
   become_user: pierce
   vars_files:
@@ -27,7 +29,8 @@
     - include_tasks: tasks/setup_foldit_user.yml
       when: "host is not defined or host == 'foldit'"
 
-- hosts: localhost
+- name: Setup localhost
+  hosts: localhost
   connection: local
   vars_files:
     - vars/main.yml
