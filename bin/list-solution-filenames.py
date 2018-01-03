@@ -23,18 +23,20 @@ def list_solutions_in_file(filename):
               sys.stdout.write(s+'\n')
 
 def list_solutions_in_bucket(bucket):
-    session = boto3.session.Session()
-    client = session.client('s3',
-                            region_name='nyc3',
-                            endpoint_url='https://nyc3.digitaloceanspaces.com',
-                            aws_access_key_id=environ['DO_ACCESS_KEY'],
-                            aws_secret_access_key=environ['DO_SECRET_KEY'])
+    client = new_s3_session()
     resp = client.list_objects_v2(Bucket='foldit')
     keys = [obj['Key'] for obj in resp['Contents']]
     for key in keys:
         client.download_file('foldit', key, key)
         list_solutions_in_file(key)
         os.remove(key)
+
+def new_s3_session():
+    session = boto3.session.Session()
+    client = session.client('s3',
+                            aws_access_key_id=environ['AWS_ACCESS_KEY'],
+                            aws_secret_access_key=environ['AWS_SECRET_KEY'])
+    return client
 
 if __name__ == '__main__':
     import argparse

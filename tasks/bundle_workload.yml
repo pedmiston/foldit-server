@@ -1,0 +1,8 @@
+---
+
+- name: Bundle completed workloads
+  shell: cat {{ workload_dir }}/*.json > {{ bundle_file }}
+  when:
+
+- name: Bundle errors
+  shell: cat {{ workload_dir }}/*errors.csv > {{ workload_dir }}/errors-{{ bundle_id }}.csv

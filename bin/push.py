@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """push.py pushes a json file to a bucket in the cloud."""
 import sys
+import os
 from os import environ
 from pathlib import Path
 import boto3
@@ -18,8 +19,19 @@ def upload_file(bundle):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('bundle', help='json data file')
+    parser.add_argument('bundle', help='json data file or directory to glob json')
+    parser.add_argument('--keep', help='whether to keep files after pushing')
     args = parser.parse_args()
     bundle = Path(args.bundle)
-    assert bundle.exists(), 'json file not found'
-    upload_file(bundle)
+    if bundle.is_dir():
+        bundle_files = bundle.glob('*.json')
+    else:
+        assert bundle.exists(), 'json file not found'
+        bundle_files = [bundle]
+
+    for b in bundle_files:
+        print(f'push.py {b}', end='', flush=True)
+        upload_file(b)
+        print('\t| finished', flush=True)
+        if not args.keep:
+            os.remove(b)

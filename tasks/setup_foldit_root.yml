@@ -4,6 +4,6 @@
     name: go
 
 # - include: tasks/install_mysql.yml
-- include_tasks: tasks/install_neo4j.yml
+# - include_tasks: tasks/install_neo4j.yml
 
 # TODO: setup py venv

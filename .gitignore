@@ -1,3 +1,5 @@
 .profile
 *.swp
 *.retry
+__pycache__/
+.cache/

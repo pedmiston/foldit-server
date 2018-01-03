@@ -1,3 +1,5 @@
 boto3==1.4.7
 botocore==1.7.23
 ansible==2.4.2.0
+invoke==0.21.0
+pytest==3.2.3

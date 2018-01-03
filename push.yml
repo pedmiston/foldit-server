@@ -1,4 +1,6 @@
 ---
+# ansible-playbook push.yml
+# ansible-playbook push.yml -e bundle_file=1510551071.json
 - hosts: localhost
   connection: local
   vars:
@@ -7,16 +9,19 @@
   vars_files:
     - vars/main.yml
   tasks:
-    - name: Bundle completed workloads
-      shell: cat {{ workload_dir }}/*.json > {{ bundle_file }}
+    - name: Determine if bundle file already exists
+      stat: path={{ bundle_file }}
+      register: bundle_file_stat
 
-    - name: Push bundle to Digital Ocean Spaces
+    - debug: var=bundle_file_stat
+
+    - include: tasks/bundle_workload.yml
+      when: not bundle_file_stat.stat.exists
+
+    - name: Push bundle to S3
       shell: source ~/.profile && push.py {{ bundle_file }}
       args:
         executable: /bin/bash
 
-    - name: Remove all data files
-      shell: rm {{ workload_dir }}/*.json
-
-    - name: Bundle errors
-      shell: cat {{ workload_dir }}/*errors.csv > {{ workload_dir }}/errors-{{ bundle_id }}.csv && rm {{ workload_dir }}/*errors.csv
+    - name: Clean up by removing bundle file
+      file: path={{ bundle_file }} state=absent

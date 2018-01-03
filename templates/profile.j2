@@ -13,3 +13,7 @@ export AWS_SECRET_KEY={{ aws_secret_key }}
 
 source $HOME/.venvs/foldit/bin/activate
 export PATH={{ repo_loc }}/bin:$PATH
+
+export MYSQL_FOLDIT_DB="mysql+pymysql://{{ mysql_user }}:{{ mysql_foldit_password }}@{{ mysql_foldit_host }}:{{ mysql_foldit_port }}/{{ mysql_db_name }}"
+
+export MYSQL_FOLDIT_TEST_DB="mysql+pymysql://{{ mysql_test_user }}:{{ mysql_foldit_test_password }}@{{ mysql_foldit_host }}:{{ mysql_foldit_port }}/{{ mysql_test_db_name }}"

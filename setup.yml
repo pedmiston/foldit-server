@@ -1,9 +1,13 @@
 ---
 # Configure the foldit server and mirror the same environment locally.
+#
 # Usage:
 #   ansible-playbook setup.yml
 #   ansible-playbook setup.yml -e host=foldit      # run setup on foldit only
 #   ansible-playbook setup.yml -e host=localhost   # run setup on localhost only
+#
+# Requirements:
+#   export ANSIBLE_VAULT_PASSWORD_FILE=/path/to/my/vault-pass.txt
 - hosts: foldit
   become: yes
   vars_files:
