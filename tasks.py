@@ -6,9 +6,26 @@ from os import environ
 import boto3
 import botocore
 from invoke import task
+import folditdb
 
 BUCKET = 'foldit'
 
+
+@task
+def load_key(ctx, key):
+    session = new_s3_session()
+    if not Path(key).exists():
+        _get_key(key, session)
+    _load_key(key, session)
+
+@task
+def load_all_keys(ctx):
+    session = new_s3_session()
+    keys = _list_keys(session)
+    for key in keys:
+        if not Path(key).exists():
+            _get_key(key, session)
+        _load_key(key, session)
 
 @task
 def list_keys(ctx):
@@ -49,15 +66,21 @@ def _list_keys(session):
     return keys
 
 def _get_key(key, session, dst=None):
+    print(f'Downloading key "{key}"...')
+
     if dst is not None:
         dst = Path(dst, key)
     else:
         dst = key
 
     try:
-        client.download_file(BUCKET, key, dst)
+        session.download_file(BUCKET, key, dst)
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == "404":
             print(f'Object "{key}" does not exist in bucket "{BUCKET}"')
         else:
             raise
+
+def _load_key(key, session):
+    print(f'Loading key "{key}"...')
+    folditdb.load_solutions(key)
