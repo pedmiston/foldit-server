@@ -5,3 +5,5 @@
   template: src=templates/profile.j2 dest=~/.profile
   vars:
     repo_loc: "{{ repo.loc }}"
+
+- include_tasks: tasks/setup_venv.yml

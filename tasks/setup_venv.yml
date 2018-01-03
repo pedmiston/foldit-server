@@ -1,0 +1,13 @@
+---
+
+- name: Install the python venv
+  pip:
+    requirements: "{{ repo.loc }}/requirements.txt"
+    virtualenv: "{{ foldit_venv }}"
+    virtualenv_command: "python -m venv"
+
+- name: Install the folditdb package
+  pip:
+    name: "git+git@github.com:pedmiston/folditdb.git#egg=folditdb"
+    extra_args: "-e"
+    virtualenv: "{{ foldit_venv }}"

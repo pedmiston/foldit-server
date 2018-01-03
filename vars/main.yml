@@ -3,6 +3,8 @@ repo:
   url: "https://github.com/pedmiston/foldit-server.git"
   loc: "~/foldit"
 
+foldit_venv: "~/.venvs/foldit"
+
 scraper: bin/scrape
 scraper_gopath: github.com/pedmiston/foldit-go/cmd/scrape
 

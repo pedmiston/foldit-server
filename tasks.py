@@ -12,19 +12,20 @@ BUCKET = 'foldit'
 
 @task
 def list_keys(ctx):
-    """List all keys in S3 bucket."""
+    """List all keys in an S3 bucket."""
     session = new_s3_session()
     keys = _list_keys(session)
     print('\n'.join(keys))
 
 @task
 def get_key(ctx, key):
-    """Download key from S3 bucket."""
+    """Download a file from an S3 bucket."""
     session = new_s3_session()
     _get_key(key, session)
 
 @task
 def get_all_keys(ctx, dst):
+    """Download all keys in an S3 bucket."""
     session = new_s3_session()
     keys = _list_keys(session)
 

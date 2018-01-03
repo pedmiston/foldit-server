@@ -11,7 +11,7 @@ export ANSIBLE_VAULT_PASSWORD_FILE=${HOME}/.ansible_vault_password_files/foldit.
 export AWS_ACCESS_KEY={{ aws_access_key }}
 export AWS_SECRET_KEY={{ aws_secret_key }}
 
-source $HOME/.venvs/foldit/bin/activate
+source {{ foldit_venv }}/bin/activate
 export PATH={{ repo_loc }}/bin:$PATH
 
 export MYSQL_FOLDIT_DB="mysql+pymysql://{{ mysql_user }}:{{ mysql_foldit_password }}@{{ mysql_foldit_host }}:{{ mysql_foldit_port }}/{{ mysql_db_name }}"
