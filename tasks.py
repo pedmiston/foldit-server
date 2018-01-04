@@ -1,7 +1,9 @@
 import sys
 import json
 import csv
+import time
 from pathlib import Path
+import os
 from os import environ
 import boto3
 import botocore
@@ -26,6 +28,7 @@ def load_all_keys(ctx):
         if not Path(key).exists():
             _get_key(key, session)
         _load_key(key, session)
+        os.remove(key)
 
 @task
 def list_keys(ctx):
@@ -66,7 +69,8 @@ def _list_keys(session):
     return keys
 
 def _get_key(key, session, dst=None):
-    print(f'Downloading key "{key}"...')
+    t = get_time()
+    print(f'[{t}] downloading key "{key}"...')
 
     if dst is not None:
         dst = Path(dst, key)
@@ -82,5 +86,10 @@ def _get_key(key, session, dst=None):
             raise
 
 def _load_key(key, session):
-    print(f'Loading key "{key}"...')
-    folditdb.load_solutions(key)
+    t = get_time()
+    print(f'[{t}] loading key "{key}"...')
+    folditdb.load_solutions_from_file(key)
+
+
+def get_time():
+    return time.strftime('%H:%M:%S', time.localtime())
