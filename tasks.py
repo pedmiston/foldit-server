@@ -70,7 +70,7 @@ def _list_keys(session):
 
 def _get_key(key, session, dst=None):
     t = get_time()
-    print(f'[{t}] downloading key "{key}"...')
+    print('[{t}] downloading key "{key}"...'.format(t=t, key=key))
 
     if dst is not None:
         dst = Path(dst, key)
@@ -81,13 +81,13 @@ def _get_key(key, session, dst=None):
         session.download_file(BUCKET, key, dst)
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == "404":
-            print(f'Object "{key}" does not exist in bucket "{BUCKET}"')
+            print('Object "{key}" does not exist in bucket "{BUCKET}"'.format(key=key, BUCKET=BUCKET))
         else:
             raise
 
 def _load_key(key, session):
     t = get_time()
-    print(f'[{t}] loading key "{key}"...')
+    print('[{t}] loading key "{key}"...'.format(t=t, key=key))
     folditdb.load_solutions_from_file(key)
 
 
