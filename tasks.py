@@ -88,7 +88,7 @@ def _get_key(key, session, dst=None):
 def _load_key(key, session):
     t = get_time()
     print('[{t}] loading key "{key}"...'.format(t=t, key=key))
-    folditdb.load_solutions_from_file(key)
+    folditdb.load.load_solutions_from_file(key)
 
 
 def get_time():
