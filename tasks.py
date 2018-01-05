@@ -12,22 +12,27 @@ import folditdb
 
 BUCKET = 'foldit'
 
+loaded_keys_filepath = 'loaded-keys.txt'
+
 
 @task
 def load_key(ctx, key):
     session = new_s3_session()
     if not Path(key).exists():
         _get_key(key, session)
-    _load_key(key, session)
+    _load_key(key, session, save_key=True)
 
 @task
 def load_all_keys(ctx):
     session = new_s3_session()
     keys = _list_keys(session)
     for key in keys:
+        if key_has_been_loaded(key):
+            continue
+
         if not Path(key).exists():
             _get_key(key, session)
-        _load_key(key, session)
+        _load_key(key, session, save_key=True)
         os.remove(key)
 
 @task
@@ -70,7 +75,7 @@ def _list_keys(session):
 
 def _get_key(key, session, dst=None):
     t = get_time()
-    print('[{t}] downloading key "{key}"...'.format(t=t, key=key))
+    print('[{t}] downloading key "{key}"...'.format(t=t, key=key), flush=True)
 
     if dst is not None:
         dst = Path(dst, key)
@@ -85,11 +90,23 @@ def _get_key(key, session, dst=None):
         else:
             raise
 
-def _load_key(key, session):
+def _load_key(key, session, save_key=False):
     t = get_time()
-    print('[{t}] loading key "{key}"...'.format(t=t, key=key))
+    print('[{t}] loading key "{key}"...'.format(t=t, key=key), flush=True)
     folditdb.load.load_solutions_from_file(key)
+    if save_key:
+        with open(loaded_keys_filepath, 'a') as f:
+            f.write(key + '\n')
 
 
 def get_time():
     return time.strftime('%H:%M:%S', time.localtime())
+
+def has_key_been_loaded(key):
+    if not Path(loaded_keys_filepath).exists():
+        return False
+
+    with open(loaded_keys_filepath, 'r') as f:
+        keys = [l.strip() for l in f.readlines()]
+
+    return key in keys
