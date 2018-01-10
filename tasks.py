@@ -102,7 +102,7 @@ def _load_key(key, session, save_key=False):
 def get_time():
     return time.strftime('%H:%M:%S', time.localtime())
 
-def has_key_been_loaded(key):
+def key_has_been_loaded(key):
     if not Path(loaded_keys_filepath).exists():
         return False
 
