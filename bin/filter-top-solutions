@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-egrep 'FILEPATH":"\/home\/pierce\/fetch\/solution_\d+\/top\/' $1
+grep '"FILEPATH":"/home/pierce/fetch/solution_[[:digit:]]*/top/' $1
