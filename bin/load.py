@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 # Usage:
 # $ load.py --list
-# $ load.py --download-only '1510387305.json'
-# $ load.py --filter-only '1510387305.json'
+# $ load.py --clean
 # $ load.py '1510387305-top.json'
 
 import argparse
 import subprocess
 import sys
 import logging
-from os import environ, stat, remove
+from os import environ, stat
 from pathlib import Path
 
 import boto3
@@ -57,7 +56,7 @@ def get_top_solutions(key):
 
         filter_top_solutions(scrape_file, top_solutions_file)
 
-        remove(scrape_file)
+        subprocess.call('rm -f %s' % scrape_file, shell=True)
 
     return top_solutions_file
 
@@ -70,15 +69,14 @@ def get_key(key):
         session.download_file(BUCKET, key, dst)
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == "404":
-            print('Key %s not found in bucket %s' % key, BUCKET)
+            logger.info('Key %s not found in bucket %s', key, BUCKET)
             sys.exit()
 
 
 def filter_top_solutions(scrape_file, top_solutions_file):
     cmd = 'bin/filter-top-bid-solutions {} > {}'.format(scrape_file, top_solutions_file)
-    p = subprocess.Popen(cmd, shell=True)
     logger.info('Filtering top solutions %s', top_solutions_file)
-    p.communicate()
+    subprocess.run(cmd, shell=True)
 
 
 def key_has_been_loaded(key):
@@ -99,21 +97,22 @@ def save_key_to_loaded_keys_file(key):
 def load_key(key):
     top_solutions_file = get_top_solutions(key)
 
-    top_solutions_file_is_empty = (stat(top_solutions_file).st_size == 0)
+    top_solutions_file_is_empty = (stat(str(top_solutions_file)).st_size == 0)
     if top_solutions_file_is_empty:
         logger.info('No top solutions were extracted from key %s', key)
     else:
         logger.info('Loading solutions into db %s', top_solutions_file)
-        folditdb.load_top_solutions_from_file(top_solutions_file)
+        folditdb.load_top_solutions_from_file(str(top_solutions_file))
 
     save_key_to_loaded_keys_file(key)
-    remove(key)
+    subprocess.call('rm -f %s' % top_solutions_file, shell=True)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('key', nargs='?')
     parser.add_argument('--list', '-l', action='store_true')
+    parser.add_argument('--clean', '-c', action='store_true')
 
     args = parser.parse_args()
 
@@ -125,6 +124,12 @@ if __name__ == '__main__':
     if args.list:
         print('\n'.join(list_keys()))
         sys.exit()
+
+    if args.clean:
+        print('Cleaning log files')
+        subprocess.run('rm -f folditdb.log load.log', shell=True)
+        if args.key is None:
+          sys.exit()
 
     if args.key is None:
         parser.print_help()
