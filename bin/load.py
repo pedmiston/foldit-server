@@ -1,13 +1,17 @@
 #!/usr/bin/env python
-# Usage:
-# $ load.py --list
-# $ load.py --clean
-# $ load.py '1510387305-top.json'
-
+"""
+Usage:
+$ load.py --help
+$ load.py --list-keys
+$ load.py --clean-logs
+$ load.py 1510387305.json
+$ load.py all
+"""
 import argparse
 import subprocess
 import sys
 import logging
+import re
 from os import environ, stat
 from pathlib import Path
 
@@ -18,94 +22,108 @@ import folditdb
 
 # Name of S3 bucket holding scrape files
 BUCKET = 'foldit'
+# File storing which keys have been loaded
+LOADED_KEYS_FILEPATH = 'loaded-keys.txt'
 
-# Configure program logger
-logger = logging.getLogger(__name__)
-handler = logging.FileHandler('load.log')
+# Configure program logger to log to file
+LOG_FILEPATH = 'load.py.log'
+logger = logging.getLogger('folditdb')
+handler = logging.FileHandler(LOG_FILEPATH)
 handler.setLevel(logging.INFO)
 formatter = logging.Formatter('[%(asctime)s] %(message)s', datefmt='%m/%d/%Y %I:%M %p')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-# File storing which keys have been loaded
-loaded_keys_filepath = 'loaded-keys.txt'
+
+def load(key):
+    """Load a scrape file from a key in an S3 bucket into the database."""
+    if key_has_been_loaded(key):
+        logger.info('key has already been loaded, key=%s', key)
+        return
+
+    try:
+        local_key = get_local_key(key)
+    except FileNotFoundError as e:
+        logger.error('unable to download key file, %s', e)
+        return
+
+    loaded = 0
+    for json_str in filter_top_solutions_with_histories(local_key):
+        folditdb.load_from_json(json_str)
+        loaded++
+
+    logger.info('loaded %s solutions in file %s', i, local_key)
+    save_key_as_loaded(key)
+    remove(key)
 
 
-def new_s3_session():
-    session = boto3.session.Session()
-    client = session.client('s3',
-                            aws_access_key_id=environ['AWS_ACCESS_KEY'],
-                            aws_secret_access_key=environ['AWS_SECRET_KEY'])
-    return client
+def key_has_been_loaded(key):
+    """Check if this key has already been loaded."""
+    if not Path(LOADED_KEYS_FILEPATH).exists():
+        logger.info('file with loaded keys does not exist, loaded_keys_filepath="%s"', LOADED_KEYS_FILEPATH)
+        return False
+
+    keys = [line.strip() for line in open(loaded_keys_filepath)]
+    return key in keys
+
+
+def get_local_key(key):
+    """Download a file in an S3 bucket if it doesn't already exist."""
+    if Path(key).exists():
+        logger.info('key already exists locally, key="%s"', key)
+        return key
+
+    session = new_s3_session()
+    logger.info('downloading file from S3, key=%s' % key)
+    try:
+        session.download_file(BUCKET, key)
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            raise FileNotFoundError(e)
+    else:
+        return key
+
+
+def filter_top_solutions_with_histories(scrape_filepath):
+    """Filter top solutions with histories.
+
+    Most solutions are not top solutions, and the most common error
+    in loading is a file without a history. This generator function
+    only yields lines from the input file that are top solutions
+    and have histories.
+    """
+    re_top_solution = re.compile(r'/top/solution_bid'))
+    re_solution_with_histtory = re.compile(r'"HISTORY"')
+
+    for json_str in open(scrape_filepath):
+        conditions = (re_top_solution.search(json_str),
+                      re_solution_with_history.search(json_str))
+
+        if all(conditions):
+            yield json_str
+
+
+def save_key_as_loaded(key):
+    """Save key as new line in file with loaded keys."""
+    with open(LOADED_KEYS_FILEPATH, 'a') as f:
+        f.write(key + '\n')
 
 
 def list_keys():
+    """Return a list of keys in the S3 bucket."""
     session = new_s3_session()
     resp = session.list_objects_v2(Bucket=BUCKET)
     keys = [obj['Key'] for obj in resp['Contents']]
     return keys
 
 
-def get_top_solutions(key):
-    scrape_file = Path(key)
-    top_solutions_file = Path('{}-top.json'.format(scrape_file.stem))
-
-    if not top_solutions_file.exists():
-        if not scrape_file.exists():
-            get_key(key)
-
-        filter_top_solutions(scrape_file, top_solutions_file)
-
-        subprocess.call('rm -f %s' % scrape_file, shell=True)
-
-    return top_solutions_file
-
-
-def get_key(key):
-    session = new_s3_session()
-    dst = key
-    logger.info('Downloading key=%s' % key)
-    try:
-        session.download_file(BUCKET, key, dst)
-    except botocore.exceptions.ClientError as e:
-        if e.response['Error']['Code'] == "404":
-            logger.info('Key %s not found in bucket %s', key, BUCKET)
-            sys.exit()
-
-
-def filter_top_solutions(scrape_file, top_solutions_file):
-    cmd = 'bin/filter-top-bid-solutions {} > {}'.format(scrape_file, top_solutions_file)
-    logger.info('Filtering top solutions %s', top_solutions_file)
-    subprocess.run(cmd, shell=True)
-
-
-def key_has_been_loaded(key):
-    if not Path(loaded_keys_filepath).exists():
-        return False
-
-    with open(loaded_keys_filepath, 'r') as f:
-        keys = [l.strip() for l in f.readlines()]
-
-    return key in keys
-
-
-def save_key_to_loaded_keys_file(key):
-    with open(loaded_keys_filepath, 'a') as f:
-        f.write(key + '\n')
-
-
-def load_key(key):
-    top_solutions_file = get_top_solutions(key)
-
-    top_solutions_file_is_empty = (stat(str(top_solutions_file)).st_size == 0)
-    if top_solutions_file_is_empty:
-        logger.info('No top solutions were extracted from key %s', key)
-    else:
-        logger.info('Loading solutions into db %s', top_solutions_file)
-        folditdb.load_top_solutions_from_file(str(top_solutions_file))
-
-    save_key_to_loaded_keys_file(key)
-    subprocess.call('rm -f %s' % top_solutions_file, shell=True)
+def new_s3_session():
+    """Create a new S3 client session."""
+    session = boto3.session.Session()
+    client = session.client('s3',
+                            aws_access_key_id=environ['AWS_ACCESS_KEY'],
+                            aws_secret_access_key=environ['AWS_SECRET_KEY'])
+    return client
 
 
 if __name__ == '__main__':
@@ -116,20 +134,15 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    # Always log
-    if True:
-        logger.setLevel(logging.INFO)
-        folditdb.log.use_logging('folditdb.log')
-
     if args.list:
         print('\n'.join(list_keys()))
         sys.exit()
 
     if args.clean:
         print('Cleaning log files')
-        subprocess.run('rm -f folditdb.log load.log', shell=True)
+        subprocess.run('rm -f %s' % LOG_FILEPATH, shell=True)
         if args.key is None:
-          sys.exit()
+            sys.exit()
 
     if args.key is None:
         parser.print_help()
@@ -141,8 +154,4 @@ if __name__ == '__main__':
         keys = [args.key, ]
 
     for key in keys:
-        if key_has_been_loaded(args.key):
-            logger.info('Key %s has already been loaded', args.key)
-            continue
-
         load_key(key)
