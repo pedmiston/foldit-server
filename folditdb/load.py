@@ -6,15 +6,14 @@ from sqlalchemy import exc
 
 from . import tables
 from .db import Session
-from .irdata import IRData, IRDataCreationError, IRDataPropertyError
+from .irdata import IRData, IRDataError
 
 logger = logging.getLogger(__name__)
 
 
 def load_from_json(json_str, return_on_error=True, n_tries=1):
     try:
-        irdata = IRData.from_json(json_str)
-        irdata.cache_all_properties()
+        irdata = IRData.from_json(json_str, fill_cache=True)
     except IRDataError as err:
         if return_on_error:
             logger.info('error creating irdata: %s', err)
@@ -22,6 +21,7 @@ def load_from_json(json_str, return_on_error=True, n_tries=1):
         else:
             raise e
 
+    # Try to load models from irdata "n_tries" times
     for i in range(n_tries):
         session = Session()
         try:
@@ -35,10 +35,15 @@ def load_from_json(json_str, return_on_error=True, n_tries=1):
             else:
                 raise
         else:
+            # load to db was successful!
             break
+        finally:
+            session.close()
     else:
+        # models were not loaded in "n_tries" times
         logger.error('giving up!')
         raise Exception('unable to load models from irdata')
+
 
 def load_models_from_irdata(irdata, session=None):
     # Non-local session are used for testing
@@ -58,28 +63,28 @@ def load_models_from_irdata(irdata, session=None):
         solution_type=irdata.solution_type,
         data=irdata.data,
     )
-    session.add(pdb_file)
 
     molecule = tables.Molecule(
         molecule_hash=irdata.molecule_hash,
         score=irdata.score,
     )
-    session.add(molecule)
 
     history = tables.History(
         history_hash=irdata.history_hash,
         total_moves=irdata.total_moves,
     )
-    session.add(history)
 
     puzzle = tables.Puzzle(puzzle_id=irdata.puzzle_id)
-    puzzle = session.merge(puzzle)
-    session.commit()
 
     team = tables.Team(
         team_name=irdata.team_name,
         team_type=irdata.team_type,
     )
+
+    session.add(pdb_file)
+    session.add(molecule)
+    session.add(history)
+    puzzle = session.merge(puzzle)
     team = session.merge(team)
     session.commit()
 
@@ -87,14 +92,15 @@ def load_models_from_irdata(irdata, session=None):
         team_id=team.team_id,
         puzzle_id=puzzle.puzzle_id,
     )
-    competition = session.merge(competition)
-    session.merge(competition)
 
     solution = tables.Solution(
         molecule_id=molecule.molecule_id,
         history_id=history.history_id,
     )
+
+
     session.add(solution)
+    competition = session.merge(competition)
     session.commit()
 
     submission = tables.Submission(
@@ -102,6 +108,7 @@ def load_models_from_irdata(irdata, session=None):
         solution_id=solution.solution_id,
         timestamp=irdata.timestamp,
     )
+
     session.add(submission)
     session.commit()
 
@@ -113,6 +120,7 @@ def load_models_from_irdata(irdata, session=None):
         )
         session.add(top_submission)
 
+    edit_n = 0
     prev_molecule = None
     for edit_data in irdata.edits:
         molecule = tables.Molecule(molecule_hash=edit_data.molecule_hash)
@@ -120,37 +128,44 @@ def load_models_from_irdata(irdata, session=None):
         session.commit()
 
         if prev_molecule is not None:
+            edit_n += 1
             edit = tables.Edit(
                 history_id=history.history_id,
                 molecule_id=molecule.molecule_id,
                 prev_molecule_id=prev_molecule.molecule_id,
-                moves=moves
+                moves=moves,
+                edit_n=edit_n
             )
             session.add(edit)
 
         prev_molecule = molecule
-
-    session.commit()
-
-    for player_data in irdata.player_pdls:
-        player = tables.Player(player_name=player_data.player_name,
-                               team_id=team.team_id)
-        player = session.merge(player)
+    else:
         session.commit()
 
-        for action_name, action_n in player_data.actions.items():
-            action = tables.Action(action_name=action_name)
-            action = session.merge(action)
+    # Record player actions for top solutions only
+    if irdata.solution_type == 'top':
+        for player_data in irdata.player_pdls:
+            # Get or create player
+            player = tables.Player(player_name=player_data.player_name,
+                                   team_id=team.team_id)
+            player = session.merge(player)
             session.commit()
 
-            player_action = tables.PlayerActions(
-                player_id=player.player_id,
-                action_id=action.action_id,
-                action_n=action_n,
-            )
-            session.add(player_action)
+            # Record player actions
+            for action_name, action_n in player_data.actions.items():
+                # Get or create action
+                action = tables.Action(action_name=action_name)
+                action = session.merge(action)
+                session.commit()
 
-    session.commit()
+                player_action = tables.PlayerActions(
+                    player_id=player.player_id,
+                    action_id=action.action_id,
+                    action_n=action_n,
+                )
+                session.add(player_action)
+            else:
+                session.commit()
 
     if local_session:
         session.close()

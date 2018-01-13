@@ -6,16 +6,19 @@ from collections import namedtuple
 
 re_top_solution = re.compile(r'solution_(?P<rank_type>[a-z]+)_(?P<rank>\d+)_')
 
-class IRDataCreationError(Exception):
+class IRDataError(Exception):
     pass
 
-class IRDataPropertyError(Exception):
+class IRDataCreationError(IRDataError):
     pass
 
-class PDLCreationError(Exception):
+class IRDataPropertyError(IRDataError):
     pass
 
-class PDLPropertyError(Exception):
+class PDLCreationError(IRDataError):
+    pass
+
+class PDLPropertyError(IRDataError):
     pass
 
 
@@ -51,13 +54,15 @@ class IRData:
     of the same json data into multiple model objects without redundantly
     processing the same data.
     """
-    def __init__(self, data):
+    def __init__(self, data, fill_cache=False):
         """Create an IRData object from a dict of strings."""
         self._data = data
         self._cache = {}
+        if fill_cache:
+            self.cache_all_properties()
 
     @classmethod
-    def from_json(cls, json_str):
+    def from_json(cls, json_str, cache=False):
         """Create an IRData object from a json string."""
         try:
             data = json.loads(json_str)
