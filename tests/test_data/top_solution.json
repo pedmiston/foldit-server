@@ -1,8 +1,8 @@
 {
-  "FILEPATH": "/home/pierce/fetch/solution_2002990/top/solution_bid_100_0356960861.ir_solution.pdb",
-  "HISTORY": "00000000-0000-0000-0000-000000000000:0,ff5e4d34-e39d-437a-b73f-b66f5a622e13:0,aeaaf56e-2bf0-4dbb-b842-80c630e3823d:314,345f05b7-1f41-4d37-8bfd-88c698645355:10,f1d989e7-7e7d-44cc-b4a5-e5752beb84a9:19,f065f4df-1916-4e22-82f7-3d6cb1ef487c:772,136a3a4a-d2ee-44f6-843e-f5878af8d6c9:45",
-  "PDL": ". Mark-,Contenders,115025,985857,20161006-39881adc28-win_x86,-257.588926,1,-257.588926 LOG:  Design_Mode|ACTIVATE=5 Pull_Mode|ACTIVATE=4 |ActionBandDelete=3 |ActionBandStrength=3",
-  "PID": "2002990",
-  "SCORE": "10576.88",
-  "TIMESTAMP": "1477595615"
+  "FILEPATH": "/top/solution_bid_1_",
+  "HISTORY": "v0:0,v1:1,v2:1,v3:1",
+  "PDL": ". player name,team name,1,1,LOG: |Action1=1 |Action2=1 |Action3=1 |Action4=1",
+  "PID": "1",
+  "SCORE": "100.99",
+  "TIMESTAMP": "0"
 }

@@ -2,6 +2,7 @@ import json
 import hashlib
 import re
 from datetime import datetime
+from collections import namedtuple
 
 re_top_solution = re.compile(r'solution_(?P<rank_type>[a-z]+)_(?P<rank>\d+)_')
 
@@ -71,6 +72,15 @@ class IRData:
         with open(json_filepath) as json_file:
             json_str = json_file.read()
             return cls.from_json(json_str)
+
+    def __dir__(self):
+        """Return names of properties to verify."""
+        verified_properties = 'filename solution_type rank_type rank data puzzle_id history_string molecule_hash history_hash total_moves score timestamp pdl_strings player_pdls team_name team_type edits'.split()
+        return verified_properties
+
+    def cache_all_properties(self):
+        for attr in dir(self):
+            getattr(self, attr)  # fill cache
 
     @property
     def filename(self):
@@ -166,18 +176,18 @@ class IRData:
 
     @property
     def molecule_hash(self):
-        if 'history_id' in self._cache:
-            return self._cache['history_id']
+        if 'molecule_hash' in self._cache:
+            return self._cache['molecule_hash']
 
         # Does not fail if history_string is a string
         last_move_in_history = self.history_string.split(',')[-1]
         try:
-            history_id, _ = last_move_in_history.split(':')
+            molecule_hash, _ = last_move_in_history.split(':')
         except ValueError:
             msg = 'unable to parse history: history_string="%s"'
             raise IRDataPropertyError(msg % self.history_string)
 
-        return self._cache.setdefault('history_id', history_id)
+        return self._cache.setdefault('molecule_hash', molecule_hash)
 
     @property
     def history_hash(self):
@@ -255,6 +265,22 @@ class IRData:
         return self._cache.setdefault('pdl_strings', pdl_strings)
 
     @property
+    def player_pdls(self):
+        if 'player_pdls' in self._cache:
+            return self._cache['player_pdls']
+
+        players = {}
+
+        for pdl_string in self.pdl_strings:
+            pdl = PDL.from_string(pdl_string)
+            if pdl.player_name in players:
+                players[pdl.player_name].merge_player_actions(pdl)
+            else:
+                players[pdl.player_name] = pdl
+
+        return self._cache.setdefault('player_pdls', players.values())
+
+    @property
     def team_name(self):
         if 'team_name' in self._cache:
             return self._cache['team_name']
@@ -280,19 +306,26 @@ class IRData:
 
         return self._cache.setdefault('team_type', team_type)
 
+    @property
+    def edits(self):
+        if 'edits' in self._cache:
+            return self._cache['edits']
 
-def group_pdls_by_player(pdl_strings):
-    """Merge pdl strings by player."""
-    players = {}
+        Edit = namedtuple('Edit', ['molecule_hash', 'moves'])
+        edits = []
+        for edit_info in self.history_string.split(','):
+            try:
+                molecule_hash, moves_str = edit_info.split(':')
+            except ValueError:
+                raise IRDataPropertyError('edit does not contain molecule hash and moves, %s' % edit_info)
 
-    for pdl_string in pdl_strings:
-        pdl = PDL.from_string(pdl_string)
-        if pdl.player_name in players:
-            players[pdl.player_name].merge(pdl)
-        else:
-            players[pdl.player_name] = pdl
+            try:
+                moves = int(moves_str)
+            except TypeError:
+                raise IRDataPropertyError('moves not an int, %s' % edit_info)
+            edits.append(Edit(molecule_hash, moves))
 
-    return players.values()
+        return self._cache.setdefault('edits', edits)
 
 
 class PDL:
@@ -341,7 +374,7 @@ class PDL:
         )
         return cls(data)
 
-    def merge(self, other):
+    def merge_player_actions(self, other):
         for action_name, action_n in other.items():
             if action_name in self.actions:
                 self.actions[action_name] += action_n

@@ -1,20 +1,46 @@
+import time
 import logging
 
 from sqlalchemy import exists
+from sqlalchemy import exc
 
 from . import tables
-from .irdata import IRData, group_pdls_by_player, IRDataCreationError
+from .db import Session
+from .irdata import IRData, IRDataCreationError, IRDataPropertyError
 
 logger = logging.getLogger(__name__)
 
 
-def load_from_json(json_str, session=None):
+def load_from_json(json_str, return_on_error=True, n_tries=1):
     try:
         irdata = IRData.from_json(json_str)
-    except IRDataCreationError as e:
-        logger.info('error creating irdata: %s', e)
-        return
+        irdata.cache_all_properties()
+    except IRDataError as err:
+        if return_on_error:
+            logger.info('error creating irdata: %s', err)
+            return
+        else:
+            raise e
 
+    for i in range(n_tries):
+        session = Session()
+        try:
+            load_models_from_irdata(irdata, session)
+        except exc.DBAPIError as err:
+            if err.connection_invalidated:
+                logger.error('caught a disconnect, try #%s, err=%s', i, err)
+                time.sleep(10)
+                session.rollback()
+                continue
+            else:
+                raise
+        else:
+            break
+    else:
+        logger.error('giving up!')
+        raise Exception('unable to load models from irdata')
+
+def load_models_from_irdata(irdata, session=None):
     # Non-local session are used for testing
     local_session = (session is None)
     if local_session:
@@ -88,18 +114,8 @@ def load_from_json(json_str, session=None):
         session.add(top_submission)
 
     prev_molecule = None
-    for edit_info in irdata.history_string.split(','):
-        try:
-            molecule_hash, moves_str = edit_info.split(':')
-        except ValueError:
-            raise IRDataPropertyError('edit does not contain molecule hash and moves, %s' % edit_info)
-
-        try:
-            moves = int(moves_str)
-        except TypeError:
-            raise IRDataPropertyError('moves not an int, %s' % edit_info)
-
-        molecule = tables.Molecule(molecule_hash=molecule_hash)
+    for edit_data in irdata.edits:
+        molecule = tables.Molecule(molecule_hash=edit_data.molecule_hash)
         molecule = session.merge(molecule)
         session.commit()
 
@@ -116,13 +132,13 @@ def load_from_json(json_str, session=None):
 
     session.commit()
 
-    for pdl in group_pdls_by_player(irdata.pdl_strings):
-        player = tables.Player(player_name=pdl.player_name,
+    for player_data in irdata.player_pdls:
+        player = tables.Player(player_name=player_data.player_name,
                                team_id=team.team_id)
         player = session.merge(player)
         session.commit()
 
-        for action_name, action_n in pdl.actions.items():
+        for action_name, action_n in player_data.actions.items():
             action = tables.Action(action_name=action_name)
             action = session.merge(action)
             session.commit()
