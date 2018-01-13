@@ -62,21 +62,21 @@ class IRData:
             self.cache_all_properties()
 
     @classmethod
-    def from_json(cls, json_str, cache=False):
+    def from_json(cls, json_str, **kwargs):
         """Create an IRData object from a json string."""
         try:
             data = json.loads(json_str)
         except json.JSONDecodeError as err:
             raise IRDataCreationError('bad JSON: %s' % err)
         else:
-            return cls(data)
+            return cls(data, **kwargs)
 
     @classmethod
-    def from_file(cls, json_filepath):
+    def from_file(cls, json_filepath, **kwargs):
         """Create an IRData object from a json file."""
         with open(json_filepath) as json_file:
             json_str = json_file.read()
-            return cls.from_json(json_str)
+            return cls.from_json(json_str, **kwargs)
 
     def __dir__(self):
         """Return names of properties to verify."""

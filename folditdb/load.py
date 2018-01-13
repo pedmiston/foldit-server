@@ -11,7 +11,7 @@ from .irdata import IRData, IRDataError
 logger = logging.getLogger(__name__)
 
 
-def load_from_json(json_str, return_on_error=True, n_tries=1):
+def load_from_json(json_str, session=None, return_on_error=True, n_tries=1):
     try:
         irdata = IRData.from_json(json_str, fill_cache=True)
     except IRDataError as err:
@@ -19,11 +19,12 @@ def load_from_json(json_str, return_on_error=True, n_tries=1):
             logger.info('error creating irdata: %s', err)
             return
         else:
-            raise e
+            raise err
+
+    session = session or Session()
 
     # Try to load models from irdata "n_tries" times
     for i in range(n_tries):
-        session = Session()
         try:
             load_models_from_irdata(irdata, session)
         except exc.DBAPIError as err:
@@ -46,11 +47,6 @@ def load_from_json(json_str, return_on_error=True, n_tries=1):
 
 
 def load_models_from_irdata(irdata, session=None):
-    # Non-local session are used for testing
-    local_session = (session is None)
-    if local_session:
-        session = Session()
-
     pdb_file_exists = session.query(
         exists().where(tables.PDBFile.filename == irdata.filename)
     ).scalar()
@@ -133,7 +129,7 @@ def load_models_from_irdata(irdata, session=None):
                 history_id=history.history_id,
                 molecule_id=molecule.molecule_id,
                 prev_molecule_id=prev_molecule.molecule_id,
-                moves=moves,
+                moves=edit_data.moves,
                 edit_n=edit_n
             )
             session.add(edit)
@@ -166,6 +162,3 @@ def load_models_from_irdata(irdata, session=None):
                 session.add(player_action)
             else:
                 session.commit()
-
-    if local_session:
-        session.close()
