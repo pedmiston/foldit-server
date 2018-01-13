@@ -120,6 +120,7 @@ def load_from_json(json_str, session=None):
         player = tables.Player(player_name=pdl.player_name,
                                team_id=team.team_id)
         player = session.merge(player)
+        session.commit()
 
         for action_name, action_n in pdl.actions.items():
             action = tables.Action(action_name=action_name)

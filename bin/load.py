@@ -51,7 +51,7 @@ def load(key):
     loaded = 0
     for json_str in filter_top_solutions_with_histories(local_key):
         folditdb.load_from_json(json_str)
-        loaded++
+        loaded += 1
 
     logger.info('loaded %s solutions in file %s', i, local_key)
     save_key_as_loaded(key)
@@ -94,7 +94,7 @@ def filter_top_solutions_with_histories(scrape_filepath):
     only yields lines from the input file that are top solutions
     and have histories.
     """
-    re_top_solution = re.compile(r'/top/solution_bid'))
+    re_top_solution = re.compile(r'/top/solution_bid')
     re_solution_with_histtory = re.compile(r'"HISTORY"')
 
     for json_str in open(scrape_filepath):
@@ -130,9 +130,9 @@ def new_s3_session():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('key', nargs='?')
+    parser.add_argument('key', nargs='?', help='Key to load. Pass "all" to load all keys in bucket')
     parser.add_argument('--list-keys', '-l', action='store_true')
-    parser.add_argument('--clean-logs', '-c', action='store_true')
+    parser.add_argument('--clean-log', '-c', action='store_true')
 
     args = parser.parse_args()
 
@@ -141,7 +141,7 @@ if __name__ == '__main__':
         sys.exit()
 
     if args.clean_log:
-        print('Cleaning log files')
+        print('Cleaning log file')
         subprocess.run('rm -f %s' % LOG_FILEPATH, shell=True)
         if args.key is None:
             sys.exit()

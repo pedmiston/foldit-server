@@ -31,7 +31,6 @@ class Puzzle(Base):
     def __repr__(self):
         return 'Puzzle(puzzle_id=%s)' % (self.puzzle_id, )
 
-
 class Team(Base):
     """A team is collection players."""
     __tablename__ = 'team'
@@ -100,8 +99,8 @@ class Molecule(Base):
 class Player(Base):
     """A player is a member of a team."""
     __tablename__ = 'player'
-    player_id = Column(Integer(), primary_key=True)
-    player_name = Column(String(60), unique=True, index=True)
+    player_id = Column(Integer(), primary_key=True, autoincrement=True)
+    player_name = Column(String(60), primary_key=True)
     team_id = Column(Integer(), ForeignKey('team.team_id'))
 
     player_actions = relationship('PlayerActions')
