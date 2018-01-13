@@ -30,8 +30,8 @@ if __name__ == '__main__':
         bundle_files = [bundle]
 
     for b in bundle_files:
-        print(f'push.py {b}', end='', flush=True)
+        print('push.py {}'.format(b), end='', flush=True)
         upload_file(b)
         print('\t| finished', flush=True)
         if not args.keep:
-            os.remove(b)
+            os.remove(str(b))

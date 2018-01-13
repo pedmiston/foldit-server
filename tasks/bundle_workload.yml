@@ -6,3 +6,4 @@
 
 - name: Bundle errors
   shell: cat {{ workload_dir }}/*errors.csv > {{ workload_dir }}/errors-{{ bundle_id }}.csv
+  ignore_errors: yes
