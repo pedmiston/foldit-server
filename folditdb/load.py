@@ -2,9 +2,8 @@ import logging
 
 from sqlalchemy import exists
 
-from folditdb.irdata import IRData, group_pdls_by_player
-from folditdb.db import Session
-from folditdb.tables import PDBFile
+from . import tables
+from .irdata import IRData, group_pdls_by_player, IRDataCreationError
 
 logger = logging.getLogger(__name__)
 
@@ -22,85 +21,112 @@ def load_from_json(json_str, session=None):
         session = Session()
 
     pdb_file_exists = session.query(
-        exists().where(PDBFile.filename == irdata.filename)
+        exists().where(tables.PDBFile.filename == irdata.filename)
     ).scalar()
     if pdb_file_exists:
         logger.info('pdb file already exists in the db: %s', irdata.filename)
         return
 
-    pdb_file = PDBFile(
+    pdb_file = tables.PDBFile(
         filename=irdata.filename,
         solution_type=irdata.solution_type,
         data=irdata.data,
     )
     session.add(pdb_file)
 
-    molecule = Molecule(
+    molecule = tables.Molecule(
         molecule_hash=irdata.molecule_hash,
         score=irdata.score,
     )
     session.add(molecule)
 
-    history = History(
+    history = tables.History(
         history_hash=irdata.history_hash,
         total_moves=irdata.total_moves,
     )
     session.add(history)
 
-    puzzle = Puzzle(puzzle_id=irdata.puzzle_id)
+    puzzle = tables.Puzzle(puzzle_id=irdata.puzzle_id)
     puzzle = session.merge(puzzle)
+    session.commit()
 
-    solution = Solution(
-        molecule_id=molecule.molecule_id,
-        history_id=history.history_id,
-    )
-    session.add(solution)
-
-    team = Team(
+    team = tables.Team(
         team_name=irdata.team_name,
         team_type=irdata.team_type,
     )
     team = session.merge(team)
+    session.commit()
 
-    competition = Competition(
+    competition = tables.Competition(
         team_id=team.team_id,
         puzzle_id=puzzle.puzzle_id,
     )
     competition = session.merge(competition)
+    session.merge(competition)
 
-    submission = Submission(
+    solution = tables.Solution(
+        molecule_id=molecule.molecule_id,
+        history_id=history.history_id,
+    )
+    session.add(solution)
+    session.commit()
+
+    submission = tables.Submission(
         competition_id=competition.competition_id,
         solution_id=solution.solution_id,
         timestamp=irdata.timestamp,
     )
     session.add(submission)
+    session.commit()
 
+    if irdata.solution_type == 'top':
+        top_submission = tables.TopSubmission(
+            submission_id = submission.submission_id,
+            rank_type = irdata.rank_type,
+            rank = irdata.rank,
+        )
+        session.add(top_submission)
+
+    prev_molecule = None
     for edit_info in irdata.history_string.split(','):
-        prev_molecule = None
-        for molecule_hash, moves in edit_info.split(':'):
-            molecule = Molecule(molecule_hash=molecule_hash)
-            molecule = session.merge(molecule)
+        try:
+            molecule_hash, moves_str = edit_info.split(':')
+        except ValueError:
+            raise IRDataPropertyError('edit does not contain molecule hash and moves, %s' % edit_info)
 
-            if prev_molecule is not None:
-                edit = Edit(
-                    history_id=history.history_id
-                    molecule_id=molecule.molecule_id,
-                    prev_molecule_id=prev_molecule.molecule_id,
-                    moves=moves
-                )
-                session.add(edit)
+        try:
+            moves = int(moves_str)
+        except TypeError:
+            raise IRDataPropertyError('moves not an int, %s' % edit_info)
 
-            prev_molecule = molecule
+        molecule = tables.Molecule(molecule_hash=molecule_hash)
+        molecule = session.merge(molecule)
+        session.commit()
+
+        if prev_molecule is not None:
+            edit = tables.Edit(
+                history_id=history.history_id,
+                molecule_id=molecule.molecule_id,
+                prev_molecule_id=prev_molecule.molecule_id,
+                moves=moves
+            )
+            session.add(edit)
+
+        prev_molecule = molecule
+
+    session.commit()
 
     for pdl in group_pdls_by_player(irdata.pdl_strings):
-        player = Player(player_name=pdl.player_name,
-                        team_id=team.team_id)
+        player = tables.Player(player_name=pdl.player_name,
+                               team_id=team.team_id)
         player = session.merge(player)
 
-        for action_name, action_n in pdl.actions.keys():
-            action = Action(action_name=action_name)
+        for action_name, action_n in pdl.actions.items():
+            action = tables.Action(action_name=action_name)
             action = session.merge(action)
-            player_action = PlayerActions(
+            session.commit()
+
+            player_action = tables.PlayerActions(
                 player_id=player.player_id,
                 action_id=action.action_id,
                 action_n=action_n,

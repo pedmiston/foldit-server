@@ -1,2 +1,0 @@
-#!/usr/bin/env bash
-grep '"FILEPATH":"/home/pierce/fetch/solution_[[:digit:]]*/top/solution_bid' $1

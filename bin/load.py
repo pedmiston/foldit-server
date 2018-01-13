@@ -30,7 +30,8 @@ LOG_FILEPATH = 'load.py.log'
 logger = logging.getLogger('folditdb')
 handler = logging.FileHandler(LOG_FILEPATH)
 handler.setLevel(logging.INFO)
-formatter = logging.Formatter('[%(asctime)s] %(message)s', datefmt='%m/%d/%Y %I:%M %p')
+formatter = logging.Formatter('[%(asctime)s] %(message)s',
+                              datefmt='%m/%d/%Y %I:%M%p')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
@@ -60,7 +61,8 @@ def load(key):
 def key_has_been_loaded(key):
     """Check if this key has already been loaded."""
     if not Path(LOADED_KEYS_FILEPATH).exists():
-        logger.info('file with loaded keys does not exist, loaded_keys_filepath="%s"', LOADED_KEYS_FILEPATH)
+        msg = 'file with loaded keys does not exist, loaded_keys_filepath="%s"'
+        logger.info(msg, LOADED_KEYS_FILEPATH)
         return False
 
     keys = [line.strip() for line in open(loaded_keys_filepath)]
@@ -129,16 +131,16 @@ def new_s3_session():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('key', nargs='?')
-    parser.add_argument('--list', '-l', action='store_true')
-    parser.add_argument('--clean', '-c', action='store_true')
+    parser.add_argument('--list-keys', '-l', action='store_true')
+    parser.add_argument('--clean-logs', '-c', action='store_true')
 
     args = parser.parse_args()
 
-    if args.list:
+    if args.list_keys:
         print('\n'.join(list_keys()))
         sys.exit()
 
-    if args.clean:
+    if args.clean_log:
         print('Cleaning log files')
         subprocess.run('rm -f %s' % LOG_FILEPATH, shell=True)
         if args.key is None:

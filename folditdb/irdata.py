@@ -3,8 +3,7 @@ import hashlib
 import re
 from datetime import datetime
 
-from folditdb import tables
-
+re_top_solution = re.compile(r'solution_(?P<rank_type>[a-z]+)_(?P<rank>\d+)_')
 
 class IRDataCreationError(Exception):
     pass
@@ -73,14 +72,9 @@ class IRData:
             json_str = json_file.read()
             return cls.from_json(json_str)
 
-    # Begin defining IRData properties -----------------------------------------
-
     @property
     def filename(self):
-        """The full filename for the pdb solution file.
-
-        Filenames contain information about ranking for top solutions.
-        """
+        """The full filename for the pdb solution file."""
         if 'filename' in self._cache:
             return self._cache['filename']
 
@@ -107,8 +101,38 @@ class IRData:
         return self._cache.setdefault('solution_type', solution_type)
 
     @property
+    def rank_type(self):
+        if 'rank_type' in self._cache:
+            return self._cache['rank_type']
+
+        try:
+            rank_type = re_top_solution.search(self.filename).group(1)
+        except AttributeError:
+            msg = 'unable to parse rank_type from filename, filename="%s"'
+            raise IRDataPropertyError(msg % self.filename)
+
+        return self._cache.setdefault('rank_type', rank_type)
+
+    @property
+    def rank(self):
+        if 'rank' in self._cache:
+            return self._cache['rank']
+
+        try:
+            rank_str = re_top_solution.search(self.filename).group(2)
+            rank = int(rank_str)
+        except AttributeError:
+            msg = 'unable to parse rank from filename, filename="%s"'
+            raise IRDataPropertyError(msg % self.filename)
+
+        return self._cache.setdefault('rank', rank)
+
+    @property
     def data(self):
-        return json.dumps(self._data)
+        if 'data' in self._cache:
+            return self._cache['data']
+
+        return self._cache.setdefault('data', json.dumps(self._data))
 
     @property
     def puzzle_id(self):
@@ -230,13 +254,39 @@ class IRData:
 
         return self._cache.setdefault('pdl_strings', pdl_strings)
 
+    @property
+    def team_name(self):
+        if 'team_name' in self._cache:
+            return self._cache['team_name']
+
+        pdls = [PDL.from_string(pdl_str) for pdl_str in self.pdl_strings]
+        team_names = [pdl.team_name for pdl in pdls]
+
+        if len(team_names) != 1:
+            msg = 'more than one team in pdl, pdl_strings="%s"'
+            raise IRDataPropertyError(msg % self.pdl_strings)
+
+        return self._cache.setdefault('team_name', team_names[0])
+
+    @property
+    def team_type(self):
+        if 'team_type' in self._cache:
+            return self._cache['team_type']
+
+        if self.team_name.startswith('soloist'):
+            team_type = 'soloist'
+        else:
+            team_type = 'evolver'
+
+        return self._cache.setdefault('team_type', team_type)
+
 
 def group_pdls_by_player(pdl_strings):
     """Merge pdl strings by player."""
     players = {}
 
     for pdl_string in pdl_strings:
-        pdl = PDL.from_pdl_string(pdl_string)
+        pdl = PDL.from_string(pdl_string)
         if pdl.player_name in players:
             players[pdl.player_name].merge(pdl)
         else:
@@ -255,18 +305,12 @@ class PDL:
     PDL data is used to create model objects for players and teams, as well as
     for the action log of moves made by each player.
     """
-    def __init__(self, pdl_data, irdata):
-        self._pdl_data = pdl_data
-        self._irdata = irdata
+    def __init__(self, data):
+        self._data = data
+        self._cache = {}
 
     @classmethod
-    def from_irdata(cls, irdata):
-        """Create PDL instances for each PDL string in an IRData object."""
-        return [cls.from_pdl_string(pdl_str, irdata)
-                for pdl_str in irdata.pdl_strings]
-
-    @classmethod
-    def from_pdl_string(cls, pdl_str, irdata):
+    def from_string(cls, pdl_str):
         data = {}
 
         if re.match('^\.* ', pdl_str):
@@ -280,7 +324,7 @@ class PDL:
 
         # Assign each soloist to their own team name
         if team_name == '[no group]':
-            team_name = '%s-%s' % (team_name, player_name)
+            team_name = 'soloist-%s' % player_name
 
         try:
             player_id, team_id = map(int, fields[2:4])
@@ -288,25 +332,37 @@ class PDL:
             msg = 'unable to convert player_id and team_id to ints, pdl_str="%s"'
             raise PDLCreationError(msg % pdl_str)
 
-        pdl_data = dict(
+        data = dict(
             player_name=player_name,
             team_name=team_name,
             player_id=player_id,
             team_id=team_id,
             pdl_str=pdl_str
         )
-        return cls(pdl_data, irdata)
+        return cls(data)
 
     def merge(self, other):
-        self.actions.update(other.actions)
+        for action_name, action_n in other.items():
+            if action_name in self.actions:
+                self.actions[action_name] += action_n
+            else:
+                self.actions[action_name] = action_n
+
+    @property
+    def pdl_str(self):
+        return self._data['pdl_str']
 
     @property
     def team_type(self):
-        if self._pdl_data['team_name'].startswith('[no group]'):
+        if 'team_type' in self._cache:
+            return self._cache['team_type']
+
+        if self._data['team_name'].startswith('soloist'):
             team_type = 'soloist'
         else:
             team_type = 'evolver'
-        return team_type
+
+        return self._cache.setdefault('team_type', team_type)
 
     @property
     def actions(self):
@@ -314,7 +370,11 @@ class PDL:
             return self._cache['actions']
 
         actions = {}
-        action_str = self._pdl_data['pdl_str'].split('LOG:')[1].strip()
+        try:
+            action_str = self.pdl_str.split('LOG:')[1].strip()
+        except IndexError:
+            msg = 'unable to parse actions from pdl str, pdl_str="%s"'
+            raise PDLPropertyError(msg % self.pdl_str)
 
         for x in action_str.replace('|', '').split():
             try:
@@ -329,12 +389,19 @@ class PDL:
             try:
                 action_n = int(action_n_str)
             except ValueError:
-                raise PDLPropertyError('action n is not an int: action_n_str="%s"' % action_n_str)
+                msg = 'action n is not an int: action_n_str="%s"'
+                raise PDLPropertyError(msg % action_n_str)
 
-            actions[action_name] = action_n
+            if action_name in actions:
+                actions[action_name] += action_n
+            else:
+                actions[action_name] = action_n
 
         self._cache['actions'] = actions
         return actions
+
+    def __getattr__(self, key):
+        return self._data.get(key)
 
 
 def purify(s):
