@@ -8,6 +8,7 @@
 
 - name: Install the folditdb package
   pip:
-    name: "git+git@github.com:pedmiston/folditdb.git#egg=folditdb"
+    name: "."
+    chdir: "{{ repo.loc }}"
     extra_args: "-e"
     virtualenv: "{{ foldit_venv }}"
