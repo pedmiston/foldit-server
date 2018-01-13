@@ -10,11 +10,12 @@
         - [ "{{ available_dir }}", "{{ remaining_dir }}" ]
         - [ "{{ top_solutions }}", "{{ all_solutions }}" ]
 
-   - name: Remove all workload files that were already bundled
-     shell: rm {{ workload_dir }}/{{ item }}
-     with_items:
-       - "*.json"
-       - "*errors.csv"
+    - name: Remove all workload files that were already bundled
+      shell: rm {{ workload_dir }}/{{ item }}
+      with_items:
+        - "*.json"
+        - "*errors.csv"
+      ignore_errors: yes
 
     - name: Remove empty errors files from workload dir
       shell: find {{ workload_dir }} -size 0 -print0 -exec rm {} \;
