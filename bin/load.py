@@ -36,7 +36,7 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 
-def load(key):
+def load_key(key):
     """Load a scrape file from a key in an S3 bucket into the database."""
     if key_has_been_loaded(key):
         logger.info('key has already been loaded, key=%s', key)
@@ -78,7 +78,7 @@ def get_local_key(key):
     session = new_s3_session()
     logger.info('downloading file from S3, key=%s' % key)
     try:
-        session.download_file(BUCKET, key)
+        session.download_file(BUCKET, key, key)
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == "404":
             raise FileNotFoundError(e)
