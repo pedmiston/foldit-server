@@ -301,7 +301,7 @@ class IRData:
             msg = 'more than one team in pdl, pdl_strings="%s"'
             raise IRDataPropertyError(msg % self.pdl_strings)
 
-        return self._cache.setdefault('team_name', team_names[0])
+        return self._cache.setdefault('team_name', team_names.pop())
 
     @property
     def team_type(self):
