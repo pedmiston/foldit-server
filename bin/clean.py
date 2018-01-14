@@ -14,11 +14,13 @@ if args.real:
     print('Cleaning the real database')
     DB = create_engine(environ['MYSQL_FOLDIT_DB'])
     Base.metadata.drop_all(DB)
+    Base.metadata.create_all(DB)
 
 if args.test:
     print('Cleaning the test database')
     DB = create_engine(environ['MYSQL_FOLDIT_TEST_DB'])
-    Base.metadata.drop_all(DB.connect())
+    Base.metadata.drop_all(DB)
+    Base.metadata.create_all(DB)
 
 if not any((args.real, args.test)):
     print('Error: nothing cleaned!\n')

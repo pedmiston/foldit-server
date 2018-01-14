@@ -216,6 +216,10 @@ class IRData:
         else:
             total_moves = sum(moves)
 
+        if total_moves == 0:
+            msg = 'no moves were read from history string, history_string="%s"'
+            raise IRDataPropertyError(msg % self.history_string)
+
         return self._cache.setdefault('total_moves', total_moves)
 
     @property
@@ -291,7 +295,7 @@ class IRData:
             return self._cache['team_name']
 
         pdls = [PDL.from_string(pdl_str) for pdl_str in self.pdl_strings]
-        team_names = [pdl.team_name for pdl in pdls]
+        team_names = set(pdl.team_name for pdl in pdls)
 
         if len(team_names) != 1:
             msg = 'more than one team in pdl, pdl_strings="%s"'
@@ -380,7 +384,7 @@ class PDL:
         return cls(data)
 
     def merge_player_actions(self, other):
-        for action_name, action_n in other.items():
+        for action_name, action_n in other.actions.items():
             if action_name in self.actions:
                 self.actions[action_name] += action_n
             else:

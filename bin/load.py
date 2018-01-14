@@ -51,7 +51,11 @@ def load_key(key):
 
     loaded = 0
     for json_str in filter_top_solutions_with_histories(local_key):
-        folditdb.load_from_json(json_str)
+        try:
+            folditdb.load_from_json(json_str)
+        except Exception as err:
+            logger.info('caught an error, failing out. err=%s', err)
+            raise
         loaded += 1
 
     logger.info('loaded %s solutions in file %s', i, local_key)

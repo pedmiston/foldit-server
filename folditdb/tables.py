@@ -35,8 +35,8 @@ class Team(Base):
     """A team is collection players."""
     __tablename__ = 'team'
     # Overrides team id that could be parsed from PDL strings
-    team_id = Column(Integer(), primary_key=True)
-    team_name = Column(String(60), unique=True, index=True)
+    team_id = Column(Integer(), primary_key=True, autoincrement=True)
+    team_name = Column(String(60), primary_key=True)
     team_type = Column(String(20))
     competitions = relationship('Competition')
     players = relationship('Player')
