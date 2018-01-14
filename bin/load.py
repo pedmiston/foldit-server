@@ -96,7 +96,7 @@ def filter_top_solutions_with_histories(scrape_filepath):
     and have histories.
     """
     re_top_solution = re.compile(r'/top/solution_bid')
-    re_solution_with_histtory = re.compile(r'"HISTORY"')
+    re_solution_with_history = re.compile(r'"HISTORY"')
 
     for json_str in open(scrape_filepath):
         conditions = (re_top_solution.search(json_str),

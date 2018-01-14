@@ -9,7 +9,7 @@ class PDBFile(Base):
     """A pdbfile is created from a dump of irdata fields."""
     __tablename__ = 'pdbfile'
     pdbfile_id = Column(Integer(), primary_key=True)
-    filename = Column(String(100), unique=True, index=True)
+    filename = Column(String(150), unique=True, index=True)
     solution_type = Column(String(10))
     data = Column(Text())
 
