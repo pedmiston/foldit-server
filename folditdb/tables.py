@@ -88,6 +88,7 @@ class Edit(Base):
     molecule_id = Column(Integer(), ForeignKey('molecule.molecule_id'))
     prev_molecule_id = Column(Integer(), ForeignKey('molecule.molecule_id'))
     moves = Column(Integer())
+    edit_n = Column(Integer())
 
 class Molecule(Base):
     """A molecule is a solution with a score."""

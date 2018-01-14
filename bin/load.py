@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-"""
+"""Load data from files containing IRData fields scraped from PDB solution files.
+
 Usage:
 $ load.py --help
 $ load.py --list-keys

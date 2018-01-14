@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-list-solution-filenames.py -b foldit > completed-solutions.txt
-grep top completed-solutions.txt > top-solutions.txt
-grep all completed-solutions.txt > all-solutions.txt

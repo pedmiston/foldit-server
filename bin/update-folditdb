@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-set -x
-pip install -U -e git+git@github.com:pedmiston/folditdb.git#egg=folditdb

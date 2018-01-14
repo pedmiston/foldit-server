@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""Clean the MySQL Database."""
 from os import environ
 from sqlalchemy import create_engine
 from folditdb.tables import Base
