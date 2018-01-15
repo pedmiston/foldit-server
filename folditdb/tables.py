@@ -11,7 +11,6 @@ class PDBFile(Base):
     pdbfile_id = Column(Integer(), primary_key=True)
     filename = Column(String(150), unique=True, index=True)
     solution_type = Column(String(10))
-    data = Column(Text())
 
 class Competition(Base):
     """A competition is a team competing in a particular puzzle."""

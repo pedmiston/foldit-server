@@ -57,7 +57,6 @@ def load_models_from_irdata(irdata, session=None):
     pdb_file = tables.PDBFile(
         filename=irdata.filename,
         solution_type=irdata.solution_type,
-        data=irdata.data,
     )
 
     molecule = tables.Molecule(
