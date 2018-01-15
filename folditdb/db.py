@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker
 # pool_timeout: Number of seconds to wait per connection
 DB = create_engine(environ['MYSQL_FOLDIT_DB'],
                    pool_pre_ping=True,
-                   pool_timeout=3600)
+                   pool_timeout=14400)  # 4 hours
 
 # Create a class that creates new sessions
 Session = sessionmaker()
