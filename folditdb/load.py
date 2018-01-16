@@ -21,29 +21,20 @@ def load_from_json(json_str, session=None, return_on_error=True, n_tries=1):
         else:
             raise err
 
+    local_session = (session is None)
+
     session = session or Session()
 
-    # Try to load models from irdata "n_tries" times
-    for i in range(n_tries):
+    for try_n in range(n_tries):
         try:
             load_models_from_irdata(irdata, session)
         except exc.DBAPIError as err:
-            if err.connection_invalidated:
-                logger.error('caught a disconnect, try #%s, err=%s', i, err)
-                time.sleep(10)
-                session.rollback()
-                continue
-            else:
-                raise
+            session.rollback()
+            logger.info('caught a disconnect, try #%s/%s, err="%s"', try_n+1, n_tries, err)
         else:
-            # load to db was successful!
-            break
+            logger.info('finished loading %s', irdata.filename)
         finally:
             session.close()
-    else:
-        # models were not loaded in "n_tries" times
-        logger.error('giving up!')
-        raise Exception('unable to load models from irdata')
 
 
 def load_models_from_irdata(irdata, session=None):
@@ -81,7 +72,7 @@ def load_models_from_irdata(irdata, session=None):
     session.add(history)
     puzzle = session.merge(puzzle)
     team = session.merge(team)
-    session.commit()
+    session.flush()
 
     competition = tables.Competition(
         team_id=team.team_id,
@@ -93,10 +84,9 @@ def load_models_from_irdata(irdata, session=None):
         history_id=history.history_id,
     )
 
-
     session.add(solution)
     competition = session.merge(competition)
-    session.commit()
+    session.flush()
 
     submission = tables.Submission(
         competition_id=competition.competition_id,
@@ -105,7 +95,7 @@ def load_models_from_irdata(irdata, session=None):
     )
 
     session.add(submission)
-    session.commit()
+    session.flush()
 
     if irdata.solution_type == 'top':
         top_submission = tables.TopSubmission(
@@ -115,27 +105,25 @@ def load_models_from_irdata(irdata, session=None):
         )
         session.add(top_submission)
 
-    edit_n = 0
+    edit_ix = 0
     prev_molecule = None
     for edit_data in irdata.edits:
         molecule = tables.Molecule(molecule_hash=edit_data.molecule_hash)
         molecule = session.merge(molecule)
-        session.commit()
+        session.flush()
 
         if prev_molecule is not None:
-            edit_n += 1
+            edit_ix += 1
             edit = tables.Edit(
                 history_id=history.history_id,
                 molecule_id=molecule.molecule_id,
                 prev_molecule_id=prev_molecule.molecule_id,
                 moves=edit_data.moves,
-                edit_n=edit_n
+                edit_ix=edit_ix
             )
             session.add(edit)
 
         prev_molecule = molecule
-    else:
-        session.commit()
 
     # Record player actions for top solutions only
     if irdata.solution_type == 'top':
@@ -144,14 +132,14 @@ def load_models_from_irdata(irdata, session=None):
             player = tables.Player(player_name=player_data.player_name,
                                    team_id=team.team_id)
             player = session.merge(player)
-            session.commit()
+            session.flush()
 
             # Record player actions
             for action_name, action_n in player_data.actions.items():
                 # Get or create action
                 action = tables.Action(action_name=action_name)
                 action = session.merge(action)
-                session.commit()
+                session.flush()
 
                 player_action = tables.PlayerActions(
                     player_id=player.player_id,
@@ -159,5 +147,5 @@ def load_models_from_irdata(irdata, session=None):
                     action_n=action_n,
                 )
                 session.add(player_action)
-            else:
-                session.commit()
+
+    session.commit()
