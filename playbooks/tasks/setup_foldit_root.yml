@@ -4,4 +4,3 @@
     name: go
 
 - include_tasks: tasks/install_mysql.yml
-# - include_tasks: tasks/install_neo4j.yml

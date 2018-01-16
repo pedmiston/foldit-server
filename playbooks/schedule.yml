@@ -15,6 +15,6 @@
         name: "scrape foldit solutions"
         minute: "0"
         hour: "22"
-        job: "source ~/.profile && cd {{ repo.loc }} && scrape.py"
+        job: "source ~/.profile && cd {{ repo.loc }}/playbooks && scrape.py"
         user: "{{ ansible_user_id }}"
         state: "{{ state }}"

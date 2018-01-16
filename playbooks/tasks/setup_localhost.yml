@@ -1,6 +1,6 @@
 ---
 - name: Record current working directory
-  command: pwd
+  shell: cd .. && pwd
   register: local_repo
 
 - name: Template out identical .profile on localhost
