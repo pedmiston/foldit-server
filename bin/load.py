@@ -67,6 +67,8 @@ def load_key(key, download_only=False, keep_scrape_file=False):
     if not keep_scrape_file:
         remove(key)
 
+    # Remove unnecessary lines from log file
+    subprocess.run('mv load.py.log load.py.log.bk && grep -v "finished loading" load.py.log.bk > load.py.log && rm load.py.log.bk', shell=True)
 
 def key_has_been_loaded(key):
     """Check if this key has already been loaded."""

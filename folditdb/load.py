@@ -26,6 +26,9 @@ def load_from_json(json_str, session=None, return_on_error=True, n_tries=1):
     for try_n in range(n_tries):
         try:
             load_models_from_irdata(irdata, session)
+        except DuplicatePDBFileError as err:
+            logger.info('pdb file already loaded: %s', irdata.filename)
+            break
         except exc.DBAPIError as err:
             session.rollback()
             logger.info('caught a disconnect, try #%s/%s, err="%s"', try_n+1, n_tries, err)
@@ -35,14 +38,15 @@ def load_from_json(json_str, session=None, return_on_error=True, n_tries=1):
         finally:
             session.close()
 
+class DuplicatePDBFileError(Exception):
+    pass
 
 def load_models_from_irdata(irdata, session=None):
     pdb_file_exists = session.query(
         exists().where(tables.PDBFile.filename == irdata.filename)
     ).scalar()
     if pdb_file_exists:
-        logger.info('pdb file already exists in the db: %s', irdata.filename)
-        return
+        raise DuplicatePDBFileError
 
     pdb_file = tables.PDBFile(
         filename=irdata.filename,
