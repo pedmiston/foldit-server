@@ -13,7 +13,7 @@ import subprocess
 import sys
 import logging
 import re
-from os import environ, stat
+from os import environ, stat, remove
 from pathlib import Path
 
 import boto3
@@ -37,7 +37,7 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 
-def load_key(key):
+def load_key(key, download_only=False, keep_scrape_file=False):
     """Load a scrape file from a key in an S3 bucket into the database."""
     if key_has_been_loaded(key):
         logger.info('key has already been loaded, key=%s', key)
@@ -49,6 +49,9 @@ def load_key(key):
         logger.error('unable to download key file, %s', e)
         return
 
+    if download_only:
+        return
+
     loaded = 0
     for json_str in filter_top_solutions_with_histories(local_key):
         try:
@@ -58,9 +61,11 @@ def load_key(key):
             raise
         loaded += 1
 
-    logger.info('loaded %s solutions in file %s', i, local_key)
+    logger.info('loaded %s solutions in file %s', loaded, local_key)
     save_key_as_loaded(key)
-    remove(key)
+
+    if not keep_scrape_file:
+        remove(key)
 
 
 def key_has_been_loaded(key):
@@ -70,7 +75,7 @@ def key_has_been_loaded(key):
         logger.info(msg, LOADED_KEYS_FILEPATH)
         return False
 
-    keys = [line.strip() for line in open(loaded_keys_filepath)]
+    keys = [line.strip() for line in open(LOADED_KEYS_FILEPATH)]
     return key in keys
 
 
@@ -137,6 +142,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('key', nargs='?', help='Key to load. Pass "all" to load all keys in bucket')
     parser.add_argument('--list-keys', '-l', action='store_true')
+    parser.add_argument('--download-only', '-d', action='store_true')
+    parser.add_argument('--keep-scrape-file', '-k', action='store_true')
     parser.add_argument('--clean-log', '-c', action='store_true')
 
     args = parser.parse_args()
@@ -150,7 +157,7 @@ if __name__ == '__main__':
 
     if args.clean_log:
         print('Cleaning log file')
-        subprocess.run('rm -f %s' % LOG_FILEPATH, shell=True)
+        subprocess.run('rm -f %s %s' % (LOG_FILEPATH, LOADED_KEYS_FILEPATH), shell=True)
         if args.key is None:
             sys.exit()
 
@@ -164,4 +171,4 @@ if __name__ == '__main__':
         keys = [args.key, ]
 
     for key in keys:
-        load_key(key)
+        load_key(key, download_only=args.download_only, keep_scrape_file=args.keep_scrape_file)

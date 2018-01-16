@@ -21,8 +21,6 @@ def load_from_json(json_str, session=None, return_on_error=True, n_tries=1):
         else:
             raise err
 
-    local_session = (session is None)
-
     session = session or Session()
 
     for try_n in range(n_tries):
@@ -33,6 +31,7 @@ def load_from_json(json_str, session=None, return_on_error=True, n_tries=1):
             logger.info('caught a disconnect, try #%s/%s, err="%s"', try_n+1, n_tries, err)
         else:
             logger.info('finished loading %s', irdata.filename)
+            break
         finally:
             session.close()
 
