@@ -5,7 +5,8 @@ import subprocess
 import time
 from pathlib import Path
 
-workload_dir = Path('data/workload')
+repo_dir = Path(__file__).absolute().parent.parent
+workload_dir = Path(repo_dir, 'playbooks/data/workload')
 batches_per_push = 100
 cmdf = 'ansible-playbook {name}.yml {arg_string}'
 errorf = 'error in playbook: {cmd}\n{stdout}\n'
